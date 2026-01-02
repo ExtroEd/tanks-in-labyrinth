@@ -1,18 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+        <OutputType>WinExe</OutputType>
+
+        <TargetFramework>net10.0-windows</TargetFramework>
+
+        <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\" />
-      <Folder Include="Logic\" />
-      <Folder Include="UI\Game\" />
-      <Folder Include="UI\Menu\" />
-      <Folder Include="UI\Shared\" />
+        <Folder Include="Assets\" />
+        <Folder Include="Logic\" />
+        <Folder Include="UI\Game\" />
+        <Folder Include="UI\Shared\" />
     </ItemGroup>
 
 </Project>
