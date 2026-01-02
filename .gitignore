@@ -1,0 +1,70 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# =====================
+# OS
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# Rider / JetBrains
+# =====================
+.idea/
+*.sln.iml
+
+# =====================
+# Visual Studio / MSBuild
+# =====================
+.vs/
+.vscode/
+
+# =====================
+# Build results
+# =====================
+out/
+
+# =====================
+# .NET
+# =====================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =====================
+# NuGet
+# =====================
+*.nupkg
+*.snupkg
+.nuget/
+
+# =====================
+# Logs
+# =====================
+*.log
+
+# =====================
+# Test results
+# =====================
+TestResults/
+
+# =====================
+# Rider run configs
+# =====================
+.run/
+
+# =====================
+# Environment / Secrets
+# =====================
+.env
+.env.*
+secrets.json
+
+# =====================
+# Crash dumps
+# =====================
+*.dmp
