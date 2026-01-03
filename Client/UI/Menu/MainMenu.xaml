@@ -1,37 +1,36 @@
-﻿<Window x:Class="Client.UI.Menu.MainMenu"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Tanks in Labyrinth" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen"
-        WindowStyle="None" 
-        WindowState="Maximized"
-        ResizeMode="NoResize"
-        Background="White"> <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            
-            <TextBlock Text="TANKS IN LABYRINTH" 
-                       Foreground="LightGray" 
-                       FontSize="48" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,50"
+﻿<UserControl x:Class="Client.UI.Menu.MainMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+    <Grid>
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+            <TextBlock Text="TANKS IN LABYRINTH"
+                       Foreground="LightGray"
+                       FontSize="48"
+                       FontWeight="Bold"
+                       Margin="0,0,0,100"
                        HorizontalAlignment="Center">
                 <TextBlock.Effect>
-                    <DropShadowEffect BlurRadius="10" Color="Black" ShadowDepth="0"/>
+                    <DropShadowEffect BlurRadius="10"
+                                      Color="Black"
+                                      ShadowDepth="0"/>
                 </TextBlock.Effect>
             </TextBlock>
 
-            <Button Content="Local Game" 
-                    Style="{StaticResource MainButtonStyle}" 
+            <Button Content="Local Game"
+                    Style="{StaticResource MainButtonStyle}"
                     Click="LocalGame_Click"/>
-            
-            <Button Content="LAN Game" 
-                    Style="{StaticResource MainButtonStyle}" 
+
+            <Button Content="LAN Game"
+                    Style="{StaticResource MainButtonStyle}"
                     Click="LanGame_Click"/>
-            
-            <Button Content="Exit" 
-                    Style="{StaticResource RedButtonStyle}" 
+
+            <Button Content="Exit"
+                    Style="{StaticResource RedButtonStyle}"
                     Click="Exit_Click"/>
-            
         </StackPanel>
     </Grid>
-</Window>
+</UserControl>

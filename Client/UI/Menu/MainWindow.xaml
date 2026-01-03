@@ -1,0 +1,12 @@
+﻿<Window x:Class="Client.UI.Menu.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tanks in Labyrinth"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True"
+        Background="White">
+
+    <ContentControl x:Name="MainContent"/>
+</Window>

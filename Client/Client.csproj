@@ -11,9 +11,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\" />
-        <Folder Include="Logic\" />
-        <Folder Include="UI\Game\" />
         <Folder Include="UI\Shared\" />
     </ItemGroup>
 

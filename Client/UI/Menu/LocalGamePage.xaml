@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Client.UI.Menu.LocalGamePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+    <Grid>
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+            <TextBlock Text="Local game"
+                       FontSize="42"
+                       FontWeight="Regular"
+                       Foreground="Black"
+                       Margin="0,0,0,40"
+                       HorizontalAlignment="Center"/>
+
+            <Button Content="1 Player"
+                    Style="{StaticResource MainButtonStyle}"
+                    Click="OnePlayer_Click"/>
+
+            <Button Content="2 Players"
+                    Style="{StaticResource MainButtonStyle}"
+                    Click="TwoPlayers_Click"/>
+            
+            <Button Content="3 Players"
+                    Style="{StaticResource MainButtonStyle}"
+                    Click="ThreePlayers_Click"/>
+            
+            <Button Content="4 Players"
+                    Style="{StaticResource MainButtonStyle}"
+                    Click="FourPlayers_Click"/>
+
+            <Button Content="Back"
+                    Style="{StaticResource RedButtonStyle}"
+                    Click="Back_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
