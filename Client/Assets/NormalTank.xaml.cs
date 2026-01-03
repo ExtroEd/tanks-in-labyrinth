@@ -4,9 +4,13 @@ namespace Client.Assets;
 
 public partial class NormalTank
 {
-    public NormalTank(double size)
+    public NormalTank()
     {
         InitializeComponent();
+    }
+
+    public NormalTank(double size) : this()
+    {
         Width = size;
         Height = size;
     }

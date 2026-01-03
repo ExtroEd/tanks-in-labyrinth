@@ -13,16 +13,16 @@ public partial class Game
     private readonly Random _random = new();
     private readonly int _playerCount;
 
-    public Game(int players = 1)
-    {
+    public Game(int playerCount, string[] names) {
+        _playerCount = playerCount;
         InitializeComponent();
-        _playerCount = players;
+        Hud.Initialize(playerCount, names);
         GenerateAndDrawMaze();
     }
 
     private void GenerateAndDrawMaze()
     {
-        var widthCells = _random.Next(6, 31);
+        var widthCells = _random.Next(8, 31);
         var heightCells = widthCells / 2;
 
         var maxWidth = SystemParameters.PrimaryScreenWidth * 0.85;

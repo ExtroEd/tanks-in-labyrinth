@@ -9,31 +9,16 @@ public partial class LocalGamePage
         InitializeComponent();
     }
 
-    private void OnePlayer_Click(object sender, RoutedEventArgs e)
-    {
-        StartGame(players: 1);
-    }
+    private void OnePlayer_Click(object sender, RoutedEventArgs e) => OpenLobby(1);
+    private void TwoPlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(2);
+    private void ThreePlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(3);
+    private void FourPlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(4);
 
-    private void TwoPlayers_Click(object sender, RoutedEventArgs e)
-    {
-        StartGame(players: 2);
-    }
-
-    private void ThreePlayers_Click(object sender, RoutedEventArgs e)
-    {
-        StartGame(players: 3);
-    }
-
-    private void FourPlayers_Click(object sender, RoutedEventArgs e)
-    {
-        StartGame(players: 4);
-    }
-
-    private void StartGame(int players)
+    private static void OpenLobby(int players)
     {
         if (Application.Current.MainWindow is MainWindow main)
         {
-            main.SwitchContent(new Game.Game(players));
+            main.SwitchContent(new LocalPlayersPage(players));
         }
     }
 
