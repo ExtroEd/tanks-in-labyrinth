@@ -14,4 +14,8 @@
         <Folder Include="UI\Shared\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Page Remove="UI\Game\TankView.xaml" />
+    </ItemGroup>
+
 </Project>

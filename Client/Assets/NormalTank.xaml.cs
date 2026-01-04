@@ -21,9 +21,4 @@ public partial class NormalTank
         Turret.Fill = new SolidColorBrush(secondary);
         GunBarrel.Fill = new SolidColorBrush(secondary);
     }
-
-    public void Rotate(double angle)
-    {
-        TankRotation.Angle = angle;
-    }
 }

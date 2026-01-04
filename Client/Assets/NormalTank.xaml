@@ -5,7 +5,7 @@
     <Viewbox Stretch="Uniform">
         <Grid Width="70" Height="70" RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
-                <RotateTransform x:Name="TankRotation" Angle="0"/>
+                <RotateTransform Angle="0"/>
             </Grid.RenderTransform>
 
             <Rectangle Fill="#252525" Width="8" Height="46" Margin="18,12,0,0" 
