@@ -9,7 +9,7 @@ public class TankState
     public double Angle { get; set; }
     public double Width { get; init; }
     public double Height { get; init; }
-    public UIElement Visual { get; init; }
+    public required UIElement Visual { get; init; }
 }
 
 public static class TankRegistry

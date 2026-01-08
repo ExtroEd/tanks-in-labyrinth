@@ -8,51 +8,40 @@
                 <RotateTransform Angle="0"/>
             </Grid.RenderTransform>
 
-            <Rectangle Fill="#252525" Width="8" Height="46" Margin="18,12,0,0" 
-                       HorizontalAlignment="Left" VerticalAlignment="Top" 
+            <!-- Tracks -->
+            <Rectangle Fill="#252525" Width="8" Height="46" Margin="18,12,0,0"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
                        RadiusX="2" RadiusY="2" Stroke="Black" StrokeThickness="1"/>
-            <Rectangle Fill="#252525" Width="8" Height="46" Margin="44,12,0,0" 
-                       HorizontalAlignment="Left" VerticalAlignment="Top" 
+            <Rectangle Fill="#252525" Width="8" Height="46" Margin="44,12,0,0"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
                        RadiusX="2" RadiusY="2" Stroke="Black" StrokeThickness="1"/>
-            
-            <Grid Margin="24,12,0,0" Width="22" Height="46" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Rectangle x:Name="BodyArmor" Fill="Green" Stroke="Black" StrokeThickness="1"/>
-                <Rectangle IsHitTestVisible="False">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                            <GradientStop Color="#B2000000" Offset="0"/>
-                            <GradientStop Color="Transparent" Offset="0.25"/>
-                            <GradientStop Color="Transparent" Offset="0.75"/>
-                            <GradientStop Color="#B2000000" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
+
+            <!-- Hull -->
+            <Grid Margin="24,12,0,0" Width="22" Height="46"
+                  HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Rectangle x:Name="BodyArmor"
+                           Fill="Green"
+                           Stroke="Black"
+                           StrokeThickness="1"/>
             </Grid>
 
-            <Grid Margin="31,3,0,0" Width="8" Height="25" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Rectangle x:Name="GunBarrel" Fill="Green" Stroke="Black" StrokeThickness="1" RadiusX="1" RadiusY="1"/>
-                <Rectangle IsHitTestVisible="False">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                            <GradientStop Color="#99000000" Offset="0"/>
-                            <GradientStop Color="Transparent" Offset="0.4"/>
-                            <GradientStop Color="Transparent" Offset="0.6"/>
-                            <GradientStop Color="#99000000" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
+            <!-- Barrel -->
+            <Grid Margin="31,3,0,0" Width="8" Height="25"
+                  HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Rectangle x:Name="GunBarrel"
+                           Fill="Green"
+                           Stroke="Black"
+                           StrokeThickness="1"
+                           RadiusX="1" RadiusY="1"/>
             </Grid>
-            
-            <Grid Margin="22,22,0,0" Width="26" Height="26" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Ellipse x:Name="Turret" Fill="Green" Stroke="Black" StrokeThickness="1"/>
-                <Ellipse IsHitTestVisible="False">
-                    <Ellipse.Fill>
-                        <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                            <GradientStop Color="Transparent" Offset="0.5"/>
-                            <GradientStop Color="#CC000000" Offset="1"/>
-                        </RadialGradientBrush>
-                    </Ellipse.Fill>
-                </Ellipse>
+
+            <!-- Turret -->
+            <Grid Margin="22,22,0,0" Width="26" Height="26"
+                  HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Ellipse x:Name="Turret"
+                         Fill="Green"
+                         Stroke="Black"
+                         StrokeThickness="1"/>
             </Grid>
         </Grid>
     </Viewbox>

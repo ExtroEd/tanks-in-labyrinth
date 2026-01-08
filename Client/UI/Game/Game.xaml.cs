@@ -12,10 +12,8 @@ public partial class Game
     private double _currentWallThickness;
     private readonly Random _random = new();
     private readonly int _playerCount;
-    private List<TankSpawner.SpawnedTank> _tanks = [];
-    private readonly List<TankController> _tankControllers = [];
-    private readonly HashSet<(int, int, int, int)> _passageSet = [];
-    
+    private List<(int x1, int y1, int x2, int y2)> _passages = [];
+
     private static readonly Brush LightGray =
         new SolidColorBrush(Color.FromRgb(222, 222, 222));
 
@@ -53,36 +51,14 @@ public partial class Game
         var window = Window.GetWindow(this);
         if (window == null) return;
 
-        if (_cellSize <= 0) return;
-
-        var w = (int)(MazeCanvas.Width / _cellSize);
-        var h = (int)(MazeCanvas.Height / _cellSize);
-
-        if (_tanks.Count >= 1)
-        {
-            _tankControllers.Add(new TankController(
-                _tanks[0].Tank, window, 
-                Key.W, Key.S, Key.A, Key.D, 
-                0, _cellSize, _passageSet, w, h));
-        }
-
-        if (_tanks.Count >= 2)
-        {
-            _tankControllers.Add(new TankController(
-                _tanks[1].Tank, window, 
-                Key.Up, Key.Down, Key.Left, Key.Right, 
-                0, _cellSize, _passageSet, w, h));
-        }
-
-        if (_tanks.Count >= 3)
-        {
-            _tankControllers.Add(new TankController(
-                _tanks[3].Tank, window, 
-                Key.NumPad8, Key.NumPad5, Key.NumPad4, Key.NumPad6, 
-                0, _cellSize, _passageSet, w, h));
-        }
-
-        GC.KeepAlive(_tankControllers);
+        InitializeTanks(window);
+        
+        var uri = new Uri("pack://application:,,,/Client;component/Assets/Cursors/precision.cur", UriKind.Absolute);
+        var res = Application.GetResourceStream(uri);
+        if (res?.Stream == null) return;
+        using var s = res.Stream;
+        var cursor = new Cursor(s);
+        Mouse.OverrideCursor = cursor;
     }
 
     private void GenerateAndDrawMaze()
@@ -101,36 +77,9 @@ public partial class Game
         var generator = new LabyrinthGenerator(widthCells, heightCells);
         var passages = generator.Generate();
 
-        _passageSet.Clear();
-        foreach (var p in passages)
-        {
-            _passageSet.Add((p.x1, p.y1, p.x2, p.y2));
-            _passageSet.Add((p.x2, p.y2, p.x1, p.y1));
-        }
-        
-        DrawMaze(widthCells, heightCells, passages);
+        _passages = passages;
 
-        _tanks = _tankSpawner.Spawn(
-            MazeCanvas,
-            _playerCount,
-            widthCells,
-            heightCells,
-            _cellSize
-        );
-        
-        TankRegistry.Tanks.Clear();
-        foreach (var spawned in _tanks)
-        {
-            TankRegistry.Tanks.Add(new TankState
-            {
-                Visual = spawned.Tank,
-                Width = spawned.Tank.Width,
-                Height = spawned.Tank.Height,
-                X = Canvas.GetLeft(spawned.Tank) + spawned.Tank.Width / 2,
-                Y = Canvas.GetTop(spawned.Tank) + spawned.Tank.Height / 2,
-                Angle = 0
-            });
-        }
+        DrawMaze(widthCells, heightCells, passages);
     }
 
     private void DrawMaze(int w, int h, List<(int x1, int y1, int x2, int y2)> passages)
@@ -228,6 +177,4 @@ public partial class Game
             }
         }
     }
-
-    private readonly TankSpawner _tankSpawner = new();
 }

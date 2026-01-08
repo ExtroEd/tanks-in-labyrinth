@@ -18,4 +18,9 @@
       <Page Remove="UI\Game\TankView.xaml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Assets\Cursors\precision.cur" />
+      <Resource Include="Assets\Cursors\precision.cur" />
+    </ItemGroup>
+
 </Project>
