@@ -105,7 +105,7 @@ public class TankController
             var targetAngle = (Math.Atan2(dy, dx) * 180.0 / Math.PI + 90.0) % 360.0;
             if (targetAngle < 0) targetAngle += 360.0;
 
-            var rotThreshold = 0.3 * _cellSize;
+            var rotThreshold = 0.1 * _cellSize;
             var moveThreshold = 1.0 * _cellSize;
 
             var isAtEdge = mousePos.X <= 0.5 || mousePos.Y <= 0.5 || mousePos.X >= Math.Max(_canvas.ActualWidth, _canvas.Width) - 0.5 || mousePos.Y >= Math.Max(_canvas.ActualHeight, _canvas.Height) - 0.5;

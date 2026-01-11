@@ -12,6 +12,8 @@ public partial class Game
     private readonly HashSet<(int, int, int, int)> _passageSet = [];
     private readonly TankSpawner _tankSpawner = new();
 
+    private TankShooting? _tankShooting;
+
     private void InitializeTanks(Window window)
     {
         if (_cellSize <= 0) return;
@@ -48,6 +50,8 @@ public partial class Game
             });
         }
 
+        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h);
+
         if (_tanks.Count >= 1)
         {
             _tankControllers.Add(new TankController(
@@ -82,6 +86,30 @@ public partial class Game
                 Key.NumPad8, Key.NumPad5, Key.NumPad4, Key.NumPad6, 
                 0, _cellSize, _passageSet, w, h));
         }
+
+        window.PreviewKeyDown += (_, e) =>
+        {
+            if (_tankShooting == null) return;
+
+            switch (e.Key)
+            {
+                case Key.OemTilde:
+                    if (_tanks.Count >= 1) _tankShooting.Shoot(_tanks[0].Tank);
+                    break;
+                case Key.Add:
+                    if (_tanks.Count >= 3) _tankShooting.Shoot(_tanks[2].Tank);
+                    break;
+                case Key.OemQuotes:
+                    if (_tanks.Count >= 4) _tankShooting.Shoot(_tanks[3].Tank);
+                    break;
+            }
+        };
+
+        MazeCanvas.MouseLeftButtonDown += (_, _) =>
+        {
+            if (_tankShooting == null) return;
+            if (_tanks.Count >= 2) _tankShooting.Shoot(_tanks[1].Tank);
+        };
 
         GC.KeepAlive(_tankControllers);
     }
