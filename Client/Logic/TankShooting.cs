@@ -1,7 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows;
 
 namespace Client.Logic;
 
@@ -11,47 +11,68 @@ public class TankShooting
     private readonly double _cellSize;
     private readonly int _mapW;
     private readonly int _mapH;
-    private readonly List<Bullet> _bullets = new();
+    private readonly HashSet<(int, int, int, int)> _passages;
+    private readonly List<Bullet> _bullets;
     private DateTime _lastUpdate = DateTime.Now;
 
-    // Настройки (можно подправить)
-    private const double BulletSpeedCellsPerSec = 8.0; // скорость в клетках/сек
-    private const double BulletLifetimeSeconds = 4.0;
-    private const double FireCooldownSecondsPerTank = 0.25;
+    private const double BulletSpeedCellsPerSec = 2;
+    private const double BulletLifetimeSeconds = 15.0;
+    private const double FireCooldownSecondsPerTank = 0.1;
+    private const double OwnerCollisionIgnoreSeconds = 0.1;
+    private const int MaxRicochetsPerBullet = 20;
     private readonly Dictionary<object, DateTime> _lastShotAt = new();
+    
+    public event Action<TankState, UIElement?>? TankHit;
 
-    public TankShooting(Canvas canvas, double cellSize, int mapW, int mapH)
+    public TankShooting(Canvas canvas, double cellSize, int mapW, int mapH, HashSet<(int, int, int, int)> passages)
     {
         _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
         _cellSize = cellSize;
         _mapW = mapW;
         _mapH = mapH;
+        _passages = passages ?? throw new ArgumentNullException(nameof(passages));
+        _bullets = [];
 
         CompositionTarget.Rendering += OnUpdate;
     }
-    
-    public bool Shoot(UIElement tankVisual)
-    {
-        if (tankVisual == null) return false;
 
-        if (_lastShotAt.TryGetValue(tankVisual, out var t) && (DateTime.Now - t).TotalSeconds < FireCooldownSecondsPerTank)
-            return false;
+    public void Shoot(UIElement tankVisual)
+    {
+        if (_lastShotAt.TryGetValue(tankVisual, out var t) && (DateTime.Now - t).TotalSeconds < FireCooldownSecondsPerTank) return;
 
         var state = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == tankVisual);
-        if (state == null) return false;
+        if (state == null) return;
 
-        var cx = Canvas.GetLeft(tankVisual) + tankVisual.RenderSize.Width / 2.0;
-        var cy = Canvas.GetTop(tankVisual) + tankVisual.RenderSize.Height / 2.0;
+        _ = Canvas.GetLeft(tankVisual) + tankVisual.RenderSize.Width / 2.0;
+        _ = Canvas.GetTop(tankVisual) + tankVisual.RenderSize.Height / 2.0;
 
         var angleDeg = state.Angle;
         var rad = (angleDeg - 90.0) * Math.PI / 180.0;
 
         var speed = BulletSpeedCellsPerSec * _cellSize;
         var thickness = Math.Max(1.0, 0.1 * _cellSize);
+        var radius = thickness / 2.0;
 
-        var muzzleOffset = Math.Max(state.Width, state.Height) / 2.0 + thickness;
-        var startX = cx + Math.Cos(rad) * muzzleOffset;
-        var startY = cy + Math.Sin(rad) * muzzleOffset;
+        var gunCorners = TankGeometry.GetRectCorners(state.X, state.Y, state.Angle, state.Width, state.Height, 8, 25, 3);
+
+        var vxUnit = Math.Cos(rad);
+        var vyUnit = Math.Sin(rad);
+
+        var dots = gunCorners.Select(p => p.X * vxUnit + p.Y * vyUnit).ToList();
+        var maxDot = dots.Max();
+        var frontPoints = gunCorners.Where((_, i) => Math.Abs(dots[i] - maxDot) < 1e-6).ToList();
+        if (frontPoints.Count == 0)
+        {
+            var idx = dots.IndexOf(maxDot);
+            frontPoints.Add(gunCorners[idx]);
+        }
+
+        var tipX = frontPoints.Average(p => p.X);
+        var tipY = frontPoints.Average(p => p.Y);
+
+        const double startInsetTowardCenter = 0.0;
+        var startX = tipX - vxUnit * startInsetTowardCenter;
+        var startY = tipY - vyUnit * startInsetTowardCenter;
 
         var ell = new Ellipse
         {
@@ -73,16 +94,16 @@ public class TankShooting
             Visual = ell,
             X = startX,
             Y = startY,
-            Vx = Math.Cos(rad) * speed,
-            Vy = Math.Sin(rad) * speed,
-            Radius = thickness / 2.0,
+            Vx = vxUnit * speed,
+            Vy = vyUnit * speed,
+            Radius = radius,
             SpawnedAt = DateTime.Now,
-            Owner = tankVisual
+            Owner = tankVisual,
+            RemainingRicochets = MaxRicochetsPerBullet
         };
 
         _bullets.Add(b);
         _lastShotAt[tankVisual] = DateTime.Now;
-        return true;
     }
 
     private void OnUpdate(object? sender, EventArgs e)
@@ -94,42 +115,68 @@ public class TankShooting
 
         var remove = new List<Bullet>();
 
-        foreach (var b in _bullets)
+        foreach (var b in _bullets.ToList())
         {
             b.X += b.Vx * dt;
             b.Y += b.Vy * dt;
 
+            var reflected = BulletsRicochet.TryReflectBullet(
+                ref b.X, ref b.Y, ref b.Vx, ref b.Vy,
+                b.Radius, _cellSize, _passages, _mapW, _mapH);
+
+            if (reflected)
+            {
+                b.RemainingRicochets--;
+                if (b.RemainingRicochets < 0)
+                {
+                    remove.Add(b);
+                    continue;
+                }
+            }
+
             Canvas.SetLeft(b.Visual, b.X - b.Radius);
             Canvas.SetTop(b.Visual, b.Y - b.Radius);
 
-            if ((now - b.SpawnedAt).TotalSeconds > BulletLifetimeSeconds)
+            if ((now - b.SpawnedAt).TotalSeconds > BulletLifetimeSeconds ||
+                b.X < -20 || b.Y < -20 || b.X > _mapW * _cellSize + 20 || b.Y > _mapH * _cellSize + 20)
             {
                 remove.Add(b);
                 continue;
             }
 
-            if (b.X < -20 || b.Y < -20 || b.X > _mapW * _cellSize + 20 || b.Y > _mapH * _cellSize + 20)
-            {
-                remove.Add(b);
-                continue;
-            }
+            var bulletPoly = MakeCircleApproximation(b.X, b.Y, b.Radius, 8);
 
+            TankState? hitTarget = null;
             foreach (var t in TankRegistry.Tanks)
             {
-                if (t.Visual == b.Owner) continue;
-
-                var dx = t.X - b.X;
-                var dy = t.Y - b.Y;
-                var distSq = dx * dx + dy * dy;
-
-                var tankRadius = Math.Max(t.Width, t.Height) / 2.0;
-
-                if (!(distSq <=
-                      (tankRadius + b.Radius) * (tankRadius + b.Radius)))
+                if (t.Visual == b.Owner && (now - b.SpawnedAt).TotalSeconds < OwnerCollisionIgnoreSeconds)
                     continue;
-                remove.Add(b);
+
+                var body = TankGeometry.GetRectCorners(t.X, t.Y, t.Angle, t.Width, t.Height, 34, 46, 12);
+                if (TankGeometry.ArePolygonsIntersecting(body, bulletPoly))
+                {
+                    hitTarget = t;
+                    break;
+                }
+
+                var gun = TankGeometry.GetRectCorners(t.X, t.Y, t.Angle, t.Width, t.Height, 8, 25, 3);
+                if (!TankGeometry.ArePolygonsIntersecting(gun, bulletPoly))
+                    continue;
+                hitTarget = t;
                 break;
             }
+
+            if (hitTarget == null) continue;
+            try
+            {
+                TankHit?.Invoke(hitTarget, b.Owner);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            remove.Add(b);
         }
 
         foreach (var b in remove)
@@ -137,6 +184,17 @@ public class TankShooting
             _canvas.Children.Remove(b.Visual);
             _bullets.Remove(b);
         }
+    }
+
+    private static List<Point> MakeCircleApproximation(double cx, double cy, double r, int steps)
+    {
+        var pts = new List<Point>(steps);
+        for (var i = 0; i < steps; i++)
+        {
+            var a = 2.0 * Math.PI * i / steps;
+            pts.Add(new Point(cx + Math.Cos(a) * r, cy + Math.Sin(a) * r));
+        }
+        return pts;
     }
 
     private class Bullet
@@ -149,5 +207,6 @@ public class TankShooting
         public double Radius;
         public DateTime SpawnedAt;
         public UIElement? Owner;
+        public int RemainingRicochets;
     }
 }

@@ -30,7 +30,7 @@ public class LabyrinthGenerator(int width, int height)
             AddNeighbors(wall.x2, wall.y2, visited, wallCandidates);
         }
 
-        RemoveRandomWalls(passages, 0.05);
+        RemoveRandomWalls(passages, 0.10);
 
         return passages;
     }

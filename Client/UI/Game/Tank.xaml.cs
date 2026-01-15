@@ -39,6 +39,8 @@ public partial class Game
         TankRegistry.Tanks.Clear();
         foreach (var spawned in _tanks)
         {
+            Panel.SetZIndex(spawned.Tank, 2000);
+
             TankRegistry.Tanks.Add(new TankState
             {
                 Visual = spawned.Tank,
@@ -50,8 +52,10 @@ public partial class Game
             });
         }
 
-        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h);
+        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet);
 
+        _tankShooting.TankHit += HandleTankHit;
+        
         if (_tanks.Count >= 1)
         {
             _tankControllers.Add(new TankController(
@@ -112,5 +116,21 @@ public partial class Game
         };
 
         GC.KeepAlive(_tankControllers);
+    }
+
+    private void HandleTankHit(TankState hitTank, UIElement? owner)
+    {
+        if (MazeCanvas.Children.Contains(hitTank.Visual))
+        {
+            MazeCanvas.Children.Remove(hitTank.Visual);
+        }
+
+        TankRegistry.Tanks.Remove(hitTank);
+
+        var spawned = _tanks.FirstOrDefault(s => s.Tank == hitTank.Visual);
+        if (spawned != null)
+        {
+            _tanks.Remove(spawned);
+        }
     }
 }
