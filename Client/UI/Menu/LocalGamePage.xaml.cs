@@ -8,10 +8,7 @@ public partial class LocalGamePage
     {
         InitializeComponent();
     }
-
-    private void OnePlayer_Click(object sender, RoutedEventArgs e) => OpenLobby(1);
-    private void TwoPlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(2);
-    private void ThreePlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(3);
+    
     private void FourPlayers_Click(object sender, RoutedEventArgs e) => OpenLobby(4);
 
     private static void OpenLobby(int players)

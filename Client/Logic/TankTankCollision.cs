@@ -10,10 +10,10 @@ public static class TankTankCollision
     {
         var selfCorners = TankGeometry.GetRectCorners(cx, cy, angle, w, h, 34, 46, 12);
 
-        return (from other in TankRegistry.Tanks 
-                where other.Visual != self 
-                let otherCorners = TankGeometry.GetRectCorners(other.X, other.Y, other.Angle, other.Width, other.Height, 34, 46, 12) 
-                where TankGeometry.ArePolygonsIntersecting(selfCorners, otherCorners) 
+        return (from other in TankRegistry.Tanks
+                where other.Visual != self && other.IsAlive
+                let otherCorners = TankGeometry.GetRectCorners(other.X, other.Y, other.Angle, other.Width, other.Height, 34, 46, 12)
+                where TankGeometry.ArePolygonsIntersecting(selfCorners, otherCorners)
                 select other).FirstOrDefault();
     }
     

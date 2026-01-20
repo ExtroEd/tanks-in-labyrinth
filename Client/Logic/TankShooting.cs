@@ -20,31 +20,33 @@ public class TankShooting
     private const double FireCooldownSecondsPerTank = 0.1;
     private const double OwnerCollisionIgnoreSeconds = 0.1;
     private const int MaxRicochetsPerBullet = 20;
-    private readonly Dictionary<object, DateTime> _lastShotAt = new();
-    
+    private const int MaxActiveBullets = 5;
+    private readonly Dictionary<UIElement, DateTime> _lastShotAt = new();
+    private readonly RoundManager _roundManager;
+
     public event Action<TankState, UIElement?>? TankHit;
 
-    public TankShooting(Canvas canvas, double cellSize, int mapW, int mapH, HashSet<(int, int, int, int)> passages)
+    public TankShooting(Canvas canvas, double cellSize, int mapW, int mapH, HashSet<(int, int, int, int)> passages, RoundManager roundManager)
     {
         _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
         _cellSize = cellSize;
         _mapW = mapW;
         _mapH = mapH;
         _passages = passages ?? throw new ArgumentNullException(nameof(passages));
+        _roundManager = roundManager; // Сохраняем ссылку
         _bullets = [];
 
         CompositionTarget.Rendering += OnUpdate;
     }
 
-    public void Shoot(UIElement tankVisual)
+    public void Shoot(UIElement? tankVisual)
     {
+        if (tankVisual == null) return;
+        if (_bullets.Count >= MaxActiveBullets) return;
         if (_lastShotAt.TryGetValue(tankVisual, out var t) && (DateTime.Now - t).TotalSeconds < FireCooldownSecondsPerTank) return;
 
-        var state = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == tankVisual);
+        var state = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == tankVisual && x.IsAlive);
         if (state == null) return;
-
-        _ = Canvas.GetLeft(tankVisual) + tankVisual.RenderSize.Width / 2.0;
-        _ = Canvas.GetTop(tankVisual) + tankVisual.RenderSize.Height / 2.0;
 
         var angleDeg = state.Angle;
         var rad = (angleDeg - 90.0) * Math.PI / 180.0;
@@ -147,7 +149,7 @@ public class TankShooting
             var bulletPoly = MakeCircleApproximation(b.X, b.Y, b.Radius, 8);
 
             TankState? hitTarget = null;
-            foreach (var t in TankRegistry.Tanks)
+            foreach (var t in TankRegistry.Tanks.Where(t => t.IsAlive))
             {
                 if (t.Visual == b.Owner && (now - b.SpawnedAt).TotalSeconds < OwnerCollisionIgnoreSeconds)
                     continue;
@@ -169,7 +171,20 @@ public class TankShooting
             if (hitTarget == null) continue;
             try
             {
+                if (b.Owner != null && b.Owner != hitTarget.Visual)
+                {
+                    var ownerState = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == b.Owner);
+                    if (ownerState != null)
+                    {
+                        ownerState.Kills++;
+                    }
+                }
+                hitTarget.IsAlive = false; 
+                _canvas.Children.Remove(hitTarget.Visual);
+                
                 TankHit?.Invoke(hitTarget, b.Owner);
+                
+                _roundManager.CheckRoundCondition();
             }
             catch
             {
@@ -208,5 +223,24 @@ public class TankShooting
         public DateTime SpawnedAt;
         public UIElement? Owner;
         public int RemainingRicochets;
+    }
+    
+    public void ClearBullets()
+    {
+        foreach (var b in _bullets)
+        {
+            _canvas.Children.Remove(b.Visual);
+        }
+
+        _bullets.Clear();
+    }
+    
+    public void Cleanup()
+    {
+        // ОЧЕНЬ ВАЖНО: Останавливаем старый цикл обновления
+        CompositionTarget.Rendering -= OnUpdate;
+    
+        // Удаляем визуал пуль
+        ClearBullets();
     }
 }

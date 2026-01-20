@@ -9,13 +9,17 @@
             <RowDefinition Height="*"/>      
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+    
+        <Viewbox Grid.Row="0" 
+                 Margin="30,20,30,0" 
+                 HorizontalAlignment="Center" 
+                 VerticalAlignment="Center"
+                 Stretch="Uniform"> 
         
-        <Canvas x:Name="MazeCanvas"
-                VerticalAlignment="Top"
-                HorizontalAlignment="Center"
-                Margin="0,20,0,0"
-                Background="#FFDCDCDC"/>
-        
+            <Canvas x:Name="MazeCanvas"
+                    Background="#FFDCDCDC"/>
+        </Viewbox>
+    
         <game:GameScore x:Name="Hud" Grid.Row="1"/>
     </Grid>
 </UserControl>

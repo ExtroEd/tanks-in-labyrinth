@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Client.Logic;
 
 namespace Client.UI.Game;
 
@@ -43,6 +44,8 @@ public partial class GameScore
                 AddPanel(P2Score);
                 break;
         }
+
+        RefreshScores();
     }
 
     private static void SetupPanel(StackPanel panel, TextBlock nameLabel, Assets.NormalTank icon, string name, Color color)
@@ -66,6 +69,25 @@ public partial class GameScore
             {
                 parent.Children.Remove(panel);
             }
+        }
+    }
+    
+    public void RefreshScores()
+    {
+        var tanks = TankRegistry.Tanks;
+
+        SetKills(KillsP1, 0);
+        SetKills(KillsP2, 1);
+        SetKills(KillsP3, 2);
+        SetKills(KillsP4, 3);
+        return;
+
+        void SetKills(TextBlock? tb, int playerIndex)
+        {
+            if (tb == null) return;
+            var ts = tanks.FirstOrDefault(t => t.PlayerIndex == playerIndex);
+            var text = ts != null ? $"Kills: {ts.Kills}" : "Kills: 0";
+            tb.Dispatcher.Invoke(() => tb.Text = text);
         }
     }
 }

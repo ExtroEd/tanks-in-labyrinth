@@ -8,6 +8,9 @@ namespace Client.UI.Game;
 
 public partial class Game
 {
+    private RoundManager? _roundManager;
+    private TankShooting? _shooting;
+
     private double _cellSize;
     private double _currentWallThickness;
     private readonly Random _random = new();
@@ -51,6 +54,8 @@ public partial class Game
         var window = Window.GetWindow(this);
         if (window == null) return;
 
+        _roundManager = new RoundManager(ResetRound);
+
         InitializeTanks(window);
         
         var uri = new Uri("pack://application:,,,/Client;component/Assets/Cursors/precision.cur", UriKind.Absolute);
@@ -63,7 +68,7 @@ public partial class Game
 
     private void GenerateAndDrawMaze()
     {
-        var widthCells = _random.Next(8, 31);
+        var widthCells = _random.Next(6, 7);
         var heightCells = widthCells / 2;
 
         var maxWidth = SystemParameters.PrimaryScreenWidth * 0.85;
@@ -175,6 +180,23 @@ public partial class Game
                     });
                 }
             }
+        }
+    }
+    
+    private void ResetRound()
+    {
+        _roundManager?.StopTimer();
+
+        _shooting?.Cleanup(); 
+
+        TankRegistry.Tanks.Clear();
+    
+        GenerateAndDrawMaze();
+
+        var window = Window.GetWindow(this);
+        if (window != null)
+        {
+            InitializeTanks(window);
         }
     }
 }

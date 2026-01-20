@@ -13,20 +13,8 @@
                        Foreground="Black"
                        Margin="0,0,0,40"
                        HorizontalAlignment="Center"/>
-
-            <Button Content="1 Player"
-                    Style="{StaticResource MainButtonStyle}"
-                    Click="OnePlayer_Click"/>
-
-            <Button Content="2 Players"
-                    Style="{StaticResource MainButtonStyle}"
-                    Click="TwoPlayers_Click"/>
             
-            <Button Content="3 Players"
-                    Style="{StaticResource MainButtonStyle}"
-                    Click="ThreePlayers_Click"/>
-            
-            <Button Content="4 Players"
+            <Button Content="Free For All"
                     Style="{StaticResource MainButtonStyle}"
                     Click="FourPlayers_Click"/>
 

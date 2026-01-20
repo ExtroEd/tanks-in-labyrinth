@@ -13,6 +13,11 @@ public partial class Game
     private readonly TankSpawner _tankSpawner = new();
 
     private TankShooting? _tankShooting;
+    
+    private UIElement? _shootTargetP1;
+    private UIElement? _shootTargetP2;
+    private UIElement? _shootTargetP3;
+    private UIElement? _shootTargetP4;
 
     private void InitializeTanks(Window window)
     {
@@ -37,12 +42,17 @@ public partial class Game
         );
 
         TankRegistry.Tanks.Clear();
-        foreach (var spawned in _tanks)
+        for (var idx = 0; idx < _tanks.Count; idx++)
         {
+            var spawned = _tanks[idx];
             Panel.SetZIndex(spawned.Tank, 2000);
 
             TankRegistry.Tanks.Add(new TankState
             {
+                PlayerIndex = idx,
+                IsAlive = true,
+                Kills = 0,
+
                 Visual = spawned.Tank,
                 Width = spawned.Tank.Width,
                 Height = spawned.Tank.Height,
@@ -51,9 +61,13 @@ public partial class Game
                 Angle = 0
             });
         }
+        
+        _shootTargetP1 = _tanks.Count >= 1 ? _tanks[0].Tank : null;
+        _shootTargetP2 = _tanks.Count >= 2 ? _tanks[1].Tank : null;
+        _shootTargetP3 = _tanks.Count >= 3 ? _tanks[2].Tank : null;
+        _shootTargetP4 = _tanks.Count >= 4 ? _tanks[3].Tank : null;
 
-        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet);
-
+        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet, _roundManager);
         _tankShooting.TankHit += HandleTankHit;
         
         if (_tanks.Count >= 1)
@@ -98,13 +112,13 @@ public partial class Game
             switch (e.Key)
             {
                 case Key.OemTilde:
-                    if (_tanks.Count >= 1) _tankShooting.Shoot(_tanks[0].Tank);
+                    if (_shootTargetP1 != null) _tankShooting.Shoot(_shootTargetP1);
                     break;
                 case Key.Add:
-                    if (_tanks.Count >= 3) _tankShooting.Shoot(_tanks[2].Tank);
+                    if (_shootTargetP3 != null) _tankShooting.Shoot(_shootTargetP3);
                     break;
                 case Key.OemQuotes:
-                    if (_tanks.Count >= 4) _tankShooting.Shoot(_tanks[3].Tank);
+                    if (_shootTargetP4 != null) _tankShooting.Shoot(_shootTargetP4);
                     break;
             }
         };
@@ -112,7 +126,7 @@ public partial class Game
         MazeCanvas.MouseLeftButtonDown += (_, _) =>
         {
             if (_tankShooting == null) return;
-            if (_tanks.Count >= 2) _tankShooting.Shoot(_tanks[1].Tank);
+            if (_shootTargetP2 != null) _tankShooting.Shoot(_shootTargetP2);
         };
 
         GC.KeepAlive(_tankControllers);
@@ -125,12 +139,19 @@ public partial class Game
             MazeCanvas.Children.Remove(hitTank.Visual);
         }
 
-        TankRegistry.Tanks.Remove(hitTank);
+        hitTank.IsAlive = false;
 
         var spawned = _tanks.FirstOrDefault(s => s.Tank == hitTank.Visual);
         if (spawned != null)
         {
             _tanks.Remove(spawned);
         }
+        
+        if (_shootTargetP1 == hitTank.Visual) _shootTargetP1 = null;
+        if (_shootTargetP2 == hitTank.Visual) _shootTargetP2 = null;
+        if (_shootTargetP3 == hitTank.Visual) _shootTargetP3 = null;
+        if (_shootTargetP4 == hitTank.Visual) _shootTargetP4 = null;
+        
+        Hud.RefreshScores();
     }
 }

@@ -86,6 +86,9 @@ public class TankController
 
     private void OnUpdate(object? sender, EventArgs e)
     {
+        var myState = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == _tank);
+        if (myState is { IsAlive: false }) return;
+
         var now = DateTime.Now;
         var delta = (now - _lastUpdate).TotalSeconds;
         _lastUpdate = now;

@@ -3,23 +3,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:assets="clr-namespace:Client.Assets">
     
-    <Border Background="Transparent" MinHeight="250" Padding="0,20,0,0">
+    <Border Background="Transparent" 
+            Padding="0,10,0,10" 
+            VerticalAlignment="Bottom">
         <UniformGrid x:Name="ScoreGrid" Columns="4">
             
-            <StackPanel x:Name="P1Score" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                <assets:NormalTank x:Name="IconP1" Width="120" Height="120" VerticalAlignment="Center" Margin="0,0,15,0"/>
+            <StackPanel x:Name="P1Score" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center" 
+                        Margin="10">
+                <assets:NormalTank x:Name="IconP1" 
+                                   Width="120" 
+                                   Height="120" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,15,0"/>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="NameP1" Text="Player 1" FontSize="36" Foreground="Black" FontWeight="Bold">
+                    <TextBlock x:Name="NameP1" 
+                               Text="Player 1" 
+                               FontSize="36" 
+                               Foreground="Black" 
+                               FontWeight="Bold">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="Gray" BlurRadius="4" ShadowDepth="0" Opacity="0.5"/>
+                            <DropShadowEffect Color="Gray" 
+                                              BlurRadius="4" 
+                                              ShadowDepth="0" 
+                                              Opacity="0.5"/>
                         </TextBlock.Effect>
                     </TextBlock>
-                    <TextBlock x:Name="WinsP1" Text="Wins: 0" Foreground="Black" FontSize="24"/>
-                    <TextBlock x:Name="KillsP1" Text="Kills: 0" Foreground="Black" FontSize="24"/>
+                    <TextBlock x:Name="WinsP1" 
+                               Text="Wins: 0" 
+                               Foreground="Black" 
+                               FontSize="24"/>
+                    <TextBlock x:Name="KillsP1" 
+                               Text="Kills: 0" 
+                               Foreground="Black" 
+                               FontSize="24"/>
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel x:Name="P2Score" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <StackPanel x:Name="P2Score" 
+                        Visibility="Collapsed" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center" 
+                        Margin="10">
                 <assets:NormalTank x:Name="IconP2" Width="120" Height="120" VerticalAlignment="Center" Margin="0,0,15,0"/>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="NameP2" Text="Player 2" FontSize="36" Foreground="Black" FontWeight="Bold"/>

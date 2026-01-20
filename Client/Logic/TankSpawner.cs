@@ -27,7 +27,7 @@ public class TankSpawner
             .OrderBy(_ => _random.Next())
             .ToList();
 
-        Color[] colors = new[] { Colors.Green, Colors.Red, Colors.Blue, Colors.Yellow };
+        var colors = new[] { Colors.Green, Colors.Red, Colors.Blue, Colors.Yellow };
         var targetSize = cellSize * 0.65;
 
         for (var i = 0; i < playerCount; i++)
@@ -41,9 +41,12 @@ public class TankSpawner
 
             canvas.Children.Add(tank);
 
-            // Зарегистрируем состояние танка в реестре, чтобы столкновения/стрельба работали.
             TankRegistry.Tanks.Add(new TankState
             {
+                PlayerIndex = i,
+                IsAlive = true,
+                Kills = 0,
+
                 Visual = tank,
                 X = cell.x * cellSize + cellSize / 2.0,
                 Y = cell.y * cellSize + cellSize / 2.0,
