@@ -12,10 +12,13 @@ public partial class Game
     private TankShooting? _shooting;
 
     private double _cellSize;
+    private int _mapW;
+    private int _mapH;
     private double _currentWallThickness;
     private readonly Random _random = new();
     private readonly int _playerCount;
     private List<(int x1, int y1, int x2, int y2)> _passages = [];
+    private List<TankController> _controllers = [];
 
     private static readonly Brush LightGray =
         new SolidColorBrush(Color.FromRgb(222, 222, 222));
@@ -49,13 +52,27 @@ public partial class Game
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        GenerateAndDrawMaze();
-
         var window = Window.GetWindow(this);
         if (window == null) return;
-
+        
+        CleanUpResources();
+        
+        GenerateAndDrawMaze();
+        
         _roundManager = new RoundManager(ResetRound);
 
+        _shooting?.Dispose();
+        _shooting = null;
+
+        _shooting = new TankShooting(
+            MazeCanvas,
+            _cellSize,
+            _mapW,
+            _mapH,
+            [.._passages],
+            _roundManager!
+        );
+        
         InitializeTanks(window);
         
         var uri = new Uri("pack://application:,,,/Client;component/Assets/Cursors/precision.cur", UriKind.Absolute);
@@ -66,11 +83,29 @@ public partial class Game
         Mouse.OverrideCursor = cursor;
     }
 
+    private void CleanUpResources()
+    {
+        foreach (var controller in _controllers)
+        {
+            controller.Dispose();
+        }
+        _controllers.Clear();
+
+        _shooting?.Dispose();
+        _shooting = null;
+
+        TankRegistry.Tanks.Clear();
+        MazeCanvas.Children.Clear();
+    }
+    
     private void GenerateAndDrawMaze()
     {
         var widthCells = _random.Next(6, 7);
         var heightCells = widthCells / 2;
 
+        _mapW = widthCells;
+        _mapH = heightCells;
+        
         var maxWidth = SystemParameters.PrimaryScreenWidth * 0.85;
         var maxHeight = SystemParameters.PrimaryScreenHeight * 0.85;
 
@@ -186,17 +221,21 @@ public partial class Game
     private void ResetRound()
     {
         _roundManager?.StopTimer();
-
-        _shooting?.Cleanup(); 
-
-        TankRegistry.Tanks.Clear();
     
+        CleanUpResources();
+
         GenerateAndDrawMaze();
 
+        _shooting = new TankShooting(
+            MazeCanvas,
+            _cellSize,
+            _mapW,
+            _mapH,
+            [.._passages.Select(p => (p.x1, p.y1, p.x2, p.y2))],
+            _roundManager!
+        );
+
         var window = Window.GetWindow(this);
-        if (window != null)
-        {
-            InitializeTanks(window);
-        }
+        if (window != null) InitializeTanks(window);
     }
 }

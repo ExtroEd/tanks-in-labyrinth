@@ -1,17 +1,18 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Client.Logic;
 
-public class TankShooting
+public class TankShooting : IDisposable
 {
     private readonly Canvas _canvas;
-    private readonly double _cellSize;
-    private readonly int _mapW;
-    private readonly int _mapH;
-    private readonly HashSet<(int, int, int, int)> _passages;
+    private double _cellSize;
+    private int _mapW;
+    private int _mapH;
+    private HashSet<(int, int, int, int)> _passages;
     private readonly List<Bullet> _bullets;
     private DateTime _lastUpdate = DateTime.Now;
 
@@ -25,6 +26,7 @@ public class TankShooting
     private readonly RoundManager _roundManager;
 
     public event Action<TankState, UIElement?>? TankHit;
+    private bool _disposed;
 
     public TankShooting(Canvas canvas, double cellSize, int mapW, int mapH, HashSet<(int, int, int, int)> passages, RoundManager roundManager)
     {
@@ -33,10 +35,12 @@ public class TankShooting
         _mapW = mapW;
         _mapH = mapH;
         _passages = passages ?? throw new ArgumentNullException(nameof(passages));
-        _roundManager = roundManager; // Сохраняем ссылку
+        _roundManager = roundManager;
         _bullets = [];
 
         CompositionTarget.Rendering += OnUpdate;
+        
+        Debug.WriteLine("TankShooting created");
     }
 
     public void Shoot(UIElement? tankVisual)
@@ -110,6 +114,8 @@ public class TankShooting
 
     private void OnUpdate(object? sender, EventArgs e)
     {
+        if (_disposed) return;
+        
         var now = DateTime.Now;
         var dt = (now - _lastUpdate).TotalSeconds;
         _lastUpdate = now;
@@ -224,8 +230,8 @@ public class TankShooting
         public UIElement? Owner;
         public int RemainingRicochets;
     }
-    
-    public void ClearBullets()
+
+    private void ClearBullets()
     {
         foreach (var b in _bullets)
         {
@@ -235,12 +241,35 @@ public class TankShooting
         _bullets.Clear();
     }
     
-    public void Cleanup()
+    public void ResetRoundState()
     {
-        // ОЧЕНЬ ВАЖНО: Останавливаем старый цикл обновления
-        CompositionTarget.Rendering -= OnUpdate;
-    
-        // Удаляем визуал пуль
         ClearBullets();
+        _lastShotAt.Clear();
+        _lastUpdate = DateTime.Now;
+    }
+    
+    public void UpdateMap(
+        double cellSize,
+        int mapW,
+        int mapH,
+        HashSet<(int,int,int,int)> passages)
+    {
+        _cellSize = cellSize;
+        _mapW = mapW;
+        _mapH = mapH;
+        _passages = passages;
+    }
+    
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        CompositionTarget.Rendering -= OnUpdate;
+        ClearBullets();
+        
+        Debug.WriteLine("TankShooting disposed");
+
+        GC.SuppressFinalize(this);
     }
 }

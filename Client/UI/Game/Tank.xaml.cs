@@ -22,10 +22,16 @@ public partial class Game
     private void InitializeTanks(Window window)
     {
         if (_cellSize <= 0) return;
-
+        
+        window.PreviewKeyDown -= OnWindowKeyDown; 
+        MazeCanvas.MouseLeftButtonDown -= OnCanvasMouseDown;
+        
         var w = (int)(MazeCanvas.Width / _cellSize);
         var h = (int)(MazeCanvas.Height / _cellSize);
 
+        foreach (var c in _tankControllers) c.Dispose();
+        _tankControllers.Clear();
+        
         _passageSet.Clear();
         foreach (var p in _passages)
         {
@@ -67,7 +73,8 @@ public partial class Game
         _shootTargetP3 = _tanks.Count >= 3 ? _tanks[2].Tank : null;
         _shootTargetP4 = _tanks.Count >= 4 ? _tanks[3].Tank : null;
 
-        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet, _roundManager);
+        _tankShooting?.Dispose();
+        _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet, _roundManager!);
         _tankShooting.TankHit += HandleTankHit;
         
         if (_tanks.Count >= 1)
@@ -81,6 +88,7 @@ public partial class Game
         if (_tanks.Count >= 2)
         {
             _tankControllers.Add(new TankController(
+                window,
                 _tanks[1].Tank,
                 MazeCanvas,
                 0,
@@ -105,33 +113,29 @@ public partial class Game
                 0, _cellSize, _passageSet, w, h));
         }
 
-        window.PreviewKeyDown += (_, e) =>
-        {
-            if (_tankShooting == null) return;
+        window.PreviewKeyDown += OnWindowKeyDown;
 
-            switch (e.Key)
-            {
-                case Key.OemTilde:
-                    if (_shootTargetP1 != null) _tankShooting.Shoot(_shootTargetP1);
-                    break;
-                case Key.Add:
-                    if (_shootTargetP3 != null) _tankShooting.Shoot(_shootTargetP3);
-                    break;
-                case Key.OemQuotes:
-                    if (_shootTargetP4 != null) _tankShooting.Shoot(_shootTargetP4);
-                    break;
-            }
-        };
-
-        MazeCanvas.MouseLeftButtonDown += (_, _) =>
-        {
-            if (_tankShooting == null) return;
-            if (_shootTargetP2 != null) _tankShooting.Shoot(_shootTargetP2);
-        };
+        MazeCanvas.MouseLeftButtonDown += OnCanvasMouseDown;
 
         GC.KeepAlive(_tankControllers);
     }
 
+    private void OnWindowKeyDown(object sender, KeyEventArgs e)
+    {
+        if (_tankShooting == null) return;
+        switch (e.Key)
+        {
+            case Key.OemTilde: _tankShooting.Shoot(_shootTargetP1); break;
+            case Key.Add: _tankShooting.Shoot(_shootTargetP3); break;
+            case Key.OemQuotes: _tankShooting.Shoot(_shootTargetP4); break;
+        }
+    }
+    
+    private void OnCanvasMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        _tankShooting?.Shoot(_shootTargetP2);
+    }
+    
     private void HandleTankHit(TankState hitTank, UIElement? owner)
     {
         if (MazeCanvas.Children.Contains(hitTank.Visual))

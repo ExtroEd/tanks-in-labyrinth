@@ -7,6 +7,7 @@ public class RoundManager
     private readonly DispatcherTimer _roundTimer;
     private readonly Action _onRoundEnd;
     private bool _isTimerRunning;
+    private bool _roundEnding;
 
     public RoundManager(Action onRoundEnd)
     {
@@ -32,6 +33,9 @@ public class RoundManager
 
     private void StartCountdown(double seconds)
     {
+        if (_isTimerRunning)
+            return;
+
         _roundTimer.Stop();
         _roundTimer.Interval = TimeSpan.FromSeconds(seconds);
         _roundTimer.Start();
@@ -40,9 +44,17 @@ public class RoundManager
     
     private void EndRound()
     {
+        if (_roundEnding)
+            return;
+
+        _roundEnding = true;
+
         _roundTimer.Stop();
         _isTimerRunning = false;
+
         _onRoundEnd.Invoke();
+
+        _roundEnding = false;
     }
     
     public void StopTimer()

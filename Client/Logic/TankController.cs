@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace Client.Logic;
 
-public class TankController
+public class TankController: IDisposable
 {
     private readonly UIElement _tank;
     private readonly double _cellSize;
@@ -13,10 +13,17 @@ public class TankController
     private readonly int _mapW;
     private readonly int _mapH;
     private readonly bool _isMouse;
-    private readonly Canvas? _canvas;
+    private Canvas? _canvas;
+    private Window? _window;
 
     private double _angle;
     private static readonly Random Random = new();
+
+    // Поля для хранения клавиш управления
+    private readonly Key _forwardKey;
+    private readonly Key _backwardKey;
+    private readonly Key _leftKey;
+    private readonly Key _rightKey;
 
     private const double SpeedCells = 1.5;
     private const double RotationSpeed = 250;
@@ -24,7 +31,9 @@ public class TankController
 
     private bool _forward, _backward, _left, _right;
     private DateTime _lastUpdate = DateTime.Now;
-
+    private bool _disposed;
+    
+// Конструктор для КЛАВИАТУРЫ
     public TankController(
         UIElement tank,
         Window window,
@@ -35,20 +44,25 @@ public class TankController
         int mapW, int mapH)
     {
         _tank = tank;
+        _window = window;
         _cellSize = cellSize;
         _passages = passages;
         _mapW = mapW;
         _mapH = mapH;
+        
+        _forwardKey = forward;
+        _backwardKey = backward;
+        _leftKey = left;
+        _rightKey = right;
 
         _angle = (Random.NextDouble() * 360.0 + visualAngle) % 360;
 
-        CompositionTarget.Rendering += OnUpdate;
-
-        window.PreviewKeyDown += (_, e) => HandleKey(e.Key, true, forward, backward, left, right);
-        window.PreviewKeyUp += (_, e) => HandleKey(e.Key, false, forward, backward, left, right);
+        InitializeEvents();
     }
 
+// Конструктор для МЫШИ
     public TankController(
+        Window window,
         UIElement tank,
         Canvas canvas,
         double visualAngle,
@@ -56,19 +70,30 @@ public class TankController
         HashSet<(int, int, int, int)> passages,
         int mapW, int mapH)
     {
+        _window = window;
         _tank = tank;
+        _canvas = canvas;
         _cellSize = cellSize;
         _passages = passages;
         _mapW = mapW;
         _mapH = mapH;
         _isMouse = true;
-        _canvas = canvas;
 
         _angle = (Random.NextDouble() * 360.0 + visualAngle) % 360.0;
 
-        CompositionTarget.Rendering += OnUpdate;
+        InitializeEvents();
     }
 
+    private void InitializeEvents()
+    {
+        CompositionTarget.Rendering += OnUpdate;
+        if (_window != null)
+        {
+            _window.PreviewKeyDown += HandleKeyDown;
+            _window.PreviewKeyUp += HandleKeyUp;
+        }
+    }
+    
     private void HandleKey(Key key, bool state, Key f, Key b, Key l, Key r)
     {
         if (key == f) _forward = state;
@@ -77,6 +102,12 @@ public class TankController
         if (key == r) _right = state;
     }
 
+    private void HandleKeyDown(object sender, KeyEventArgs e) => 
+        HandleKey(e.Key, true, _forwardKey, _backwardKey, _leftKey, _rightKey);
+
+    private void HandleKeyUp(object sender, KeyEventArgs e) =>
+        HandleKey(e.Key, false, _forwardKey, _backwardKey, _leftKey, _rightKey);
+    
     private static double NormalizeAngleDiff(double a)
     {
         while (a > 180) a -= 360;
@@ -86,6 +117,8 @@ public class TankController
 
     private void OnUpdate(object? sender, EventArgs e)
     {
+        if (_disposed) return;
+        
         var myState = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == _tank);
         if (myState is { IsAlive: false }) return;
 
@@ -93,6 +126,9 @@ public class TankController
         var delta = (now - _lastUpdate).TotalSeconds;
         _lastUpdate = now;
 
+        // Фикс: если лагает или дебаг, delta может быть огромной
+        if (delta > 0.1) delta = 0.1;
+        
         var curX = Canvas.GetLeft(_tank) + _tank.RenderSize.Width / 2;
         var curY = Canvas.GetTop(_tank) + _tank.RenderSize.Height / 2;
 
@@ -276,5 +312,21 @@ public class TankController
                 }
             }
         }
+    }
+    
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        CompositionTarget.Rendering -= OnUpdate;
+        if (_window != null)
+        {
+            _window.PreviewKeyDown -= HandleKeyDown;
+            _window.PreviewKeyUp -= HandleKeyUp;
+        }
+        
+        _canvas = null;
+        _window = null;
     }
 }
