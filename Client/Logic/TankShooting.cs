@@ -9,10 +9,10 @@ namespace Client.Logic;
 public class TankShooting : IDisposable
 {
     private readonly Canvas _canvas;
-    private double _cellSize;
-    private int _mapW;
-    private int _mapH;
-    private HashSet<(int, int, int, int)> _passages;
+    private readonly double _cellSize;
+    private readonly int _mapW;
+    private readonly int _mapH;
+    private readonly HashSet<(int, int, int, int)> _passages;
     private readonly List<Bullet> _bullets;
     private DateTime _lastUpdate = DateTime.Now;
 
@@ -240,26 +240,7 @@ public class TankShooting : IDisposable
 
         _bullets.Clear();
     }
-    
-    public void ResetRoundState()
-    {
-        ClearBullets();
-        _lastShotAt.Clear();
-        _lastUpdate = DateTime.Now;
-    }
-    
-    public void UpdateMap(
-        double cellSize,
-        int mapW,
-        int mapH,
-        HashSet<(int,int,int,int)> passages)
-    {
-        _cellSize = cellSize;
-        _mapW = mapW;
-        _mapH = mapH;
-        _passages = passages;
-    }
-    
+
     public void Dispose()
     {
         if (_disposed) return;

@@ -8,7 +8,6 @@ namespace Client.UI.Game;
 public partial class Game
 {
     private List<TankSpawner.SpawnedTank> _tanks = [];
-    private readonly List<TankController> _tankControllers = [];
     private readonly HashSet<(int, int, int, int)> _passageSet = [];
     private readonly TankSpawner _tankSpawner = new();
 
@@ -29,8 +28,10 @@ public partial class Game
         var w = (int)(MazeCanvas.Width / _cellSize);
         var h = (int)(MazeCanvas.Height / _cellSize);
 
-        foreach (var c in _tankControllers) c.Dispose();
-        _tankControllers.Clear();
+        foreach (var c in _controllers) c.Dispose();
+        _controllers.Clear();
+        
+        _tanks.Clear();
         
         _passageSet.Clear();
         foreach (var p in _passages)
@@ -79,7 +80,7 @@ public partial class Game
         
         if (_tanks.Count >= 1)
         {
-            _tankControllers.Add(new TankController(
+            _controllers.Add(new TankController(
                 _tanks[0].Tank, window, 
                 Key.W, Key.S, Key.A, Key.D, 
                 0, _cellSize, _passageSet, w, h));
@@ -87,7 +88,7 @@ public partial class Game
 
         if (_tanks.Count >= 2)
         {
-            _tankControllers.Add(new TankController(
+            _controllers.Add(new TankController(
                 window,
                 _tanks[1].Tank,
                 MazeCanvas,
@@ -99,25 +100,25 @@ public partial class Game
 
         if (_tanks.Count >= 3)
         {
-            _tankControllers.Add(new TankController(
+            _controllers.Add(new TankController(
                 _tanks[3].Tank, window, 
                 Key.O, Key.L, Key.K, Key.OemSemicolon, 
                 0, _cellSize, _passageSet, w, h));
-        }
+        } // Good
 
         if (_tanks.Count >= 4)
         {
-            _tankControllers.Add(new TankController(
+            _controllers.Add(new TankController(
                 _tanks[2].Tank, window, 
                 Key.NumPad8, Key.NumPad5, Key.NumPad4, Key.NumPad6, 
                 0, _cellSize, _passageSet, w, h));
-        }
+        } // Good
 
         window.PreviewKeyDown += OnWindowKeyDown;
 
         MazeCanvas.MouseLeftButtonDown += OnCanvasMouseDown;
 
-        GC.KeepAlive(_tankControllers);
+        GC.KeepAlive(_controllers);
     }
 
     private void OnWindowKeyDown(object sender, KeyEventArgs e)
@@ -138,6 +139,18 @@ public partial class Game
     
     private void HandleTankHit(TankState hitTank, UIElement? owner)
     {
+        if (owner != null)
+        {
+            var killer = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == owner);
+            if (killer != null)
+            {
+                var killerIdx = killer.PlayerIndex;
+
+                TankRegistry.SessionScores.TryAdd(killerIdx, 0);
+                TankRegistry.SessionScores[killerIdx]++;
+            }
+        }
+
         if (MazeCanvas.Children.Contains(hitTank.Visual))
         {
             MazeCanvas.Children.Remove(hitTank.Visual);

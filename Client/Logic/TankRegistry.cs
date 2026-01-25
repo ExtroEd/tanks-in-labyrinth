@@ -22,11 +22,13 @@ public static class TankRegistry
 {
     public static readonly List<TankState> Tanks = [];
 
+    public static Dictionary<int, int> SessionScores { get; } = new();
+    public static Dictionary<int, int> SessionWins { get; } = new();
+    
     public static void UpdateState(UIElement visual, double x, double y, double angle)
     {
         var state = Tanks.FirstOrDefault(t => t.Visual == visual);
-        if (state == null) return;
-        if (!state.IsAlive) return;
+        if (state is not { IsAlive: true }) return;
         state.X = x;
         state.Y = y;
         state.Angle = angle;

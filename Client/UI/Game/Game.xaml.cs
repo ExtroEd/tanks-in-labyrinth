@@ -18,13 +18,15 @@ public partial class Game
     private readonly Random _random = new();
     private readonly int _playerCount;
     private List<(int x1, int y1, int x2, int y2)> _passages = [];
-    private List<TankController> _controllers = [];
+    private readonly List<TankController> _controllers = [];
 
     private static readonly Brush LightGray =
         new SolidColorBrush(Color.FromRgb(222, 222, 222));
 
     private static readonly Brush Gray =
         new SolidColorBrush(Color.FromRgb(212, 212, 212));
+    
+    private bool _isInitialized;
 
     public Game(int playerCount, string[] names)
     {
@@ -52,6 +54,9 @@ public partial class Game
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+        
         var window = Window.GetWindow(this);
         if (window == null) return;
         
@@ -59,7 +64,12 @@ public partial class Game
         
         GenerateAndDrawMaze();
         
-        _roundManager = new RoundManager(ResetRound);
+        _roundManager = new RoundManager(
+            () => Application.Current.Dispatcher.Invoke(ResetRound),
+            () => Application.Current.Dispatcher.Invoke(() => Hud.RefreshScores())
+        );
+
+        ResetRound();
 
         _shooting?.Dispose();
         _shooting = null;
@@ -220,10 +230,22 @@ public partial class Game
     
     private void ResetRound()
     {
+// 1. Останавливаем таймеры, чтобы они не стрельнули во время сброса
         _roundManager?.StopTimer();
-    
+
+        // 2. Полная визуальная очистка холста
+        MazeCanvas.Children.Clear();
+
+        // 3. ПОЛНАЯ логическая очистка (убиваем дубликатов здесь)
+        _tanks.Clear();             // Очищаем локальный список визуалов
+        TankRegistry.Tanks.Clear(); // Очищаем глобальный реестр состояний
+        _controllers.ForEach(c => c.Dispose());
+        _controllers.Clear();       // Очищаем контроллеры
+
+        // 4. Очистка ресурсов (подписки, события)
         CleanUpResources();
 
+        // 5. Генерация новой карты
         GenerateAndDrawMaze();
 
         _shooting = new TankShooting(
@@ -236,6 +258,12 @@ public partial class Game
         );
 
         var window = Window.GetWindow(this);
-        if (window != null) InitializeTanks(window);
+        if (window != null)
+        {
+            InitializeTanks(window);
+        }
+
+        // 8. Обновляем счет
+        Hud.RefreshScores();
     }
 }

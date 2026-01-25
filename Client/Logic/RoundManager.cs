@@ -8,10 +8,12 @@ public class RoundManager
     private readonly Action _onRoundEnd;
     private bool _isTimerRunning;
     private bool _roundEnding;
-
-    public RoundManager(Action onRoundEnd)
+    private readonly Action _onScoreChanged;
+    
+    public RoundManager(Action onRoundEnd, Action onScoreChanged)
     {
         _onRoundEnd = onRoundEnd;
+        _onScoreChanged = onScoreChanged;
         _roundTimer = new DispatcherTimer();
         _roundTimer.Tick += (_, _) => EndRound();
     }
@@ -44,16 +46,22 @@ public class RoundManager
     
     private void EndRound()
     {
-        if (_roundEnding)
-            return;
-
+        if (_roundEnding) return;
         _roundEnding = true;
-
         _roundTimer.Stop();
         _isTimerRunning = false;
 
-        _onRoundEnd.Invoke();
+        var winner = TankRegistry.Tanks.FirstOrDefault(t => t.IsAlive);
+        if (winner != null)
+        {
+            var winnerIdx = winner.PlayerIndex;
+            TankRegistry.SessionWins.TryAdd(winnerIdx, 0);
+            TankRegistry.SessionWins[winnerIdx]++;
+        
+            _onScoreChanged(); 
+        }
 
+        _onRoundEnd.Invoke();
         _roundEnding = false;
     }
     

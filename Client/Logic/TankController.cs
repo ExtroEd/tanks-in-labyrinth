@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace Client.Logic;
 
-public class TankController: IDisposable
+public sealed class TankController : IDisposable
 {
     private readonly UIElement _tank;
     private readonly double _cellSize;
@@ -13,268 +13,213 @@ public class TankController: IDisposable
     private readonly int _mapW;
     private readonly int _mapH;
     private readonly bool _isMouse;
+    
     private Canvas? _canvas;
     private Window? _window;
 
     private double _angle;
     private static readonly Random Random = new();
+    private DateTime _lastUpdate = DateTime.Now;
+    private bool _disposed;
 
-    // Поля для хранения клавиш управления
-    private readonly Key _forwardKey;
-    private readonly Key _backwardKey;
-    private readonly Key _leftKey;
-    private readonly Key _rightKey;
+    private readonly Key _forwardKey, _backwardKey, _leftKey, _rightKey;
+    private bool _forward, _backward, _left, _right;
 
     private const double SpeedCells = 1.5;
     private const double RotationSpeed = 250;
     private const double BackwardFactor = 0.75;
+    private const double TimeStepLimit = 0.1;
 
-    private bool _forward, _backward, _left, _right;
-    private DateTime _lastUpdate = DateTime.Now;
-    private bool _disposed;
-    
-// Конструктор для КЛАВИАТУРЫ
+    // --- Конструктор для КЛАВИАТУРЫ ---
     public TankController(
-        UIElement tank,
-        Window window,
+        UIElement tank, Window window,
         Key forward, Key backward, Key left, Key right,
-        double visualAngle,
-        double cellSize,
-        HashSet<(int, int, int, int)> passages,
-        int mapW, int mapH)
+        double visualAngle, double cellSize,
+        HashSet<(int, int, int, int)> passages, int mapW, int mapH)
+        : this(tank, window, visualAngle, cellSize, passages, mapW, mapH)
     {
-        _tank = tank;
-        _window = window;
-        _cellSize = cellSize;
-        _passages = passages;
-        _mapW = mapW;
-        _mapH = mapH;
-        
         _forwardKey = forward;
         _backwardKey = backward;
         _leftKey = left;
         _rightKey = right;
-
-        _angle = (Random.NextDouble() * 360.0 + visualAngle) % 360;
-
+        _isMouse = false;
         InitializeEvents();
     }
 
-// Конструктор для МЫШИ
+    // --- Конструктор для МЫШИ ---
     public TankController(
-        Window window,
-        UIElement tank,
-        Canvas canvas,
-        double visualAngle,
-        double cellSize,
-        HashSet<(int, int, int, int)> passages,
-        int mapW, int mapH)
+        Window window, UIElement tank, Canvas canvas,
+        double visualAngle, double cellSize,
+        HashSet<(int, int, int, int)> passages, int mapW, int mapH)
+        : this(tank, window, visualAngle, cellSize, passages, mapW, mapH)
     {
-        _window = window;
-        _tank = tank;
         _canvas = canvas;
+        _isMouse = true;
+        InitializeEvents();
+    }
+
+    private TankController(UIElement tank, Window window, double visualAngle, double cellSize,
+        HashSet<(int, int, int, int)> passages, int mapW, int mapH)
+    {
+        _tank = tank;
+        _window = window;
         _cellSize = cellSize;
         _passages = passages;
         _mapW = mapW;
         _mapH = mapH;
-        _isMouse = true;
-
-        _angle = (Random.NextDouble() * 360.0 + visualAngle) % 360.0;
-
-        InitializeEvents();
+        _angle = (Random.NextDouble() * 360.0 + visualAngle) % 360;
     }
 
     private void InitializeEvents()
     {
         CompositionTarget.Rendering += OnUpdate;
-        if (_window != null)
-        {
-            _window.PreviewKeyDown += HandleKeyDown;
-            _window.PreviewKeyUp += HandleKeyUp;
-        }
+        if (_window == null) return;
+        _window.PreviewKeyDown += HandleKeyDown;
+        _window.PreviewKeyUp += HandleKeyUp;
     }
     
-    private void HandleKey(Key key, bool state, Key f, Key b, Key l, Key r)
+    private void HandleKeyDown(object sender, KeyEventArgs e) => HandleKey(e.Key, true);
+    private void HandleKeyUp(object sender, KeyEventArgs e) => HandleKey(e.Key, false);
+
+    private void HandleKey(Key key, bool state)
     {
-        if (key == f) _forward = state;
-        if (key == b) _backward = state;
-        if (key == l) _left = state;
-        if (key == r) _right = state;
+        if (_isMouse) return;
+        if (key == _forwardKey) _forward = state;
+        if (key == _backwardKey) _backward = state;
+        if (key == _leftKey) _left = state;
+        if (key == _rightKey) _right = state;
     }
-
-    private void HandleKeyDown(object sender, KeyEventArgs e) => 
-        HandleKey(e.Key, true, _forwardKey, _backwardKey, _leftKey, _rightKey);
-
-    private void HandleKeyUp(object sender, KeyEventArgs e) =>
-        HandleKey(e.Key, false, _forwardKey, _backwardKey, _leftKey, _rightKey);
     
-    private static double NormalizeAngleDiff(double a)
-    {
-        while (a > 180) a -= 360;
-        while (a < -180) a += 360;
-        return a;
-    }
-
     private void OnUpdate(object? sender, EventArgs e)
     {
         if (_disposed) return;
-        
+
         var myState = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == _tank);
         if (myState is { IsAlive: false }) return;
 
         var now = DateTime.Now;
         var delta = (now - _lastUpdate).TotalSeconds;
         _lastUpdate = now;
+        if (delta > TimeStepLimit) delta = TimeStepLimit;
 
-        // Фикс: если лагает или дебаг, delta может быть огромной
-        if (delta > 0.1) delta = 0.1;
-        
         var curX = Canvas.GetLeft(_tank) + _tank.RenderSize.Width / 2;
         var curY = Canvas.GetTop(_tank) + _tank.RenderSize.Height / 2;
 
-        TankRegistry.UpdateState(_tank, curX, curY, _angle);
-        
+        double moveAmount;
+        double? targetRotationAngle;
+
         if (_isMouse && _canvas != null)
         {
-            var mousePos = Mouse.GetPosition(_canvas);
-            var dx = mousePos.X - curX;
-            var dy = mousePos.Y - curY;
-            var dist = Math.Sqrt(dx * dx + dy * dy);
-
-            var targetAngle = (Math.Atan2(dy, dx) * 180.0 / Math.PI + 90.0) % 360.0;
-            if (targetAngle < 0) targetAngle += 360.0;
-
-            var rotThreshold = 0.1 * _cellSize;
-            var moveThreshold = 1.0 * _cellSize;
-
-            var isAtEdge = mousePos.X <= 0.5 || mousePos.Y <= 0.5 || mousePos.X >= Math.Max(_canvas.ActualWidth, _canvas.Width) - 0.5 || mousePos.Y >= Math.Max(_canvas.ActualHeight, _canvas.Height) - 0.5;
-
-            if (dist > rotThreshold)
-            {
-                var diff = NormalizeAngleDiff(targetAngle - _angle);
-                if (Math.Abs(diff) > 0.5)
-                {
-                    var rotationDir = diff < 0 ? -1 : 1;
-                    var rotationAmount = rotationDir * RotationSpeed * delta;
-                    if (Math.Abs(rotationAmount) > Math.Abs(diff)) rotationAmount = diff;
-                    var nextAngle = (_angle + rotationAmount) % 360;
-                    if (nextAngle < 0) nextAngle += 360;
-
-                    var wallHit = TankWallCollision.IsCollidingWithWall(curX, curY, nextAngle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH);
-                    var tankHit = TankTankCollision.IsHittingAnyTank(_tank, curX, curY, nextAngle, _tank.RenderSize.Width, _tank.RenderSize.Height);
-
-                    if (wallHit || tankHit)
-                    {
-                        var resolved = false;
-                        for (var r = 1; r <= 3; r++)
-                        {
-                            for (var a = 0; a < 360; a += 45)
-                            {
-                                var testX = curX + Math.Cos(a * Math.PI / 180) * r;
-                                var testY = curY + Math.Sin(a * Math.PI / 180) * r;
-
-                                if (TankWallCollision.IsCollidingWithWall(testX, testY,
-                                        nextAngle, _tank.RenderSize.Width,
-                                        _tank.RenderSize.Height, _cellSize, _passages,
-                                        _mapW, _mapH) ||
-                                    TankTankCollision.IsHittingAnyTank(_tank, testX,
-                                        testY, nextAngle, _tank.RenderSize.Width,
-                                        _tank.RenderSize.Height)) continue;
-                                curX = testX;
-                                curY = testY;
-                                _angle = nextAngle;
-                                resolved = true;
-                                break;
-                            }
-                            if (resolved) break;
-                        }
-                    }
-                    else
-                    {
-                        _angle = nextAngle;
-                    }
-                }
-            }
-
-            var move = 0.0;
-            if (dist > moveThreshold || isAtEdge)
-            {
-                var angleToCursor = NormalizeAngleDiff(targetAngle - _angle);
-                if (Math.Abs(angleToCursor) <= 90.0)
-                {
-                    move += SpeedCells * _cellSize * delta;
-                }
-                else
-                {
-                    move -= SpeedCells * BackwardFactor * _cellSize * delta;
-                }
-            }
-
-            ApplyMovement(ref curX, ref curY, move);
+            ProcessMouseInput(curX, curY, delta, out moveAmount, out targetRotationAngle);
         }
         else
         {
-            if (_left || _right)
-            {
-                double rotationDir = _left ? -1 : 1;
-                var nextAngle = (_angle + rotationDir * RotationSpeed * delta) % 360;
-
-                var wallHit = TankWallCollision.IsCollidingWithWall(curX, curY, nextAngle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH);
-                var tankHit = TankTankCollision.IsHittingAnyTank(_tank, curX, curY, nextAngle, _tank.RenderSize.Width, _tank.RenderSize.Height);
-
-                if (wallHit || tankHit)
-                {
-                    var resolved = false;
-                    for (var r = 1; r <= 3; r++)
-                    {
-                        for (var a = 0; a < 360; a += 45)
-                        {
-                            var testX = curX + Math.Cos(a * Math.PI / 180) * r;
-                            var testY = curY + Math.Sin(a * Math.PI / 180) * r;
-
-                            if (TankWallCollision.IsCollidingWithWall(testX, testY,
-                                    nextAngle, _tank.RenderSize.Width,
-                                    _tank.RenderSize.Height, _cellSize, _passages,
-                                    _mapW, _mapH) ||
-                                TankTankCollision.IsHittingAnyTank(_tank, testX,
-                                    testY, nextAngle, _tank.RenderSize.Width,
-                                    _tank.RenderSize.Height)) continue;
-                            curX = testX;
-                            curY = testY;
-                            _angle = nextAngle;
-                            resolved = true;
-                            break;
-                        }
-                        if (resolved) break;
-                    }
-                }
-                else
-                {
-                    _angle = nextAngle;
-                }
-            }
-
-            var move = 0.0;
-            if (_forward) move += SpeedCells * _cellSize * delta;
-            if (_backward) move -= SpeedCells * BackwardFactor * _cellSize * delta;
-
-            ApplyMovement(ref curX, ref curY, move);
+            ProcessKeyboardInput(delta, out moveAmount, out targetRotationAngle);
         }
 
-        Canvas.SetLeft(_tank, curX - _tank.RenderSize.Width / 2);
-        Canvas.SetTop(_tank, curY - _tank.RenderSize.Height / 2);
+        if (targetRotationAngle.HasValue)
+        {
+            TryApplyRotation(targetRotationAngle.Value, ref curX, ref curY);
+        }
 
-        TankRegistry.UpdateState(_tank, curX, curY, _angle);
+        if (Math.Abs(moveAmount) > 0.01)
+        {
+            ApplyMovement(moveAmount, ref curX, ref curY);
+        }
 
-        _tank.RenderTransform = new RotateTransform(_angle, _tank.RenderSize.Width / 2, _tank.RenderSize.Height / 2);
+        UpdateVisuals(curX, curY);
+    }
+    
+    private void ProcessKeyboardInput(double delta, out double moveAmount, out double? targetAngle)
+    {
+        moveAmount = 0;
+        targetAngle = null;
+
+        if (_left || _right)
+        {
+            double dir = _left ? -1 : 1;
+            targetAngle = (_angle + dir * RotationSpeed * delta) % 360;
+        }
+
+        if (_forward) moveAmount += SpeedCells * _cellSize * delta;
+        if (_backward) moveAmount -= SpeedCells * BackwardFactor * _cellSize * delta;
     }
 
-    private void ApplyMovement(ref double curX, ref double curY, double move)
+    private void ProcessMouseInput(double curX, double curY, double delta, out double moveAmount, out double? targetAngle)
     {
-        if (Math.Abs(move) <= 0.01) return;
+        moveAmount = 0;
+        targetAngle = null;
+        
+        var mousePos = Mouse.GetPosition(_canvas);
+        var dx = mousePos.X - curX;
+        var dy = mousePos.Y - curY;
+        var dist = Math.Sqrt(dx * dx + dy * dy);
 
+        var desiredAngle = (Math.Atan2(dy, dx) * 180.0 / Math.PI + 90.0) % 360.0;
+        if (desiredAngle < 0) desiredAngle += 360.0;
+
+        var rotThreshold = 0.1 * _cellSize;
+        var moveThreshold = 1.0 * _cellSize;
+        
+        if (dist > rotThreshold)
+        {
+            var diff = NormalizeAngleDiff(desiredAngle - _angle);
+            if (Math.Abs(diff) > 0.5)
+            {
+                var dir = diff < 0 ? -1 : 1;
+                var rotationStep = dir * RotationSpeed * delta;
+                
+                if (Math.Abs(rotationStep) > Math.Abs(diff)) 
+                    targetAngle = desiredAngle;
+                else 
+                    targetAngle = (_angle + rotationStep) % 360;
+            }
+        }
+
+        var isAtEdge = mousePos.X <= 0.5 || mousePos.Y <= 0.5 || 
+                       mousePos.X >= Math.Max(_canvas!.ActualWidth, _canvas.Width) - 0.5 || 
+                       mousePos.Y >= Math.Max(_canvas.ActualHeight, _canvas.Height) - 0.5;
+
+        if (!(dist > moveThreshold) && !isAtEdge) return;
+        var angleToCursor = NormalizeAngleDiff(desiredAngle - _angle);
+        if (Math.Abs(angleToCursor) <= 90.0)
+            moveAmount = SpeedCells * _cellSize * delta;
+        else
+            moveAmount = -SpeedCells * BackwardFactor * _cellSize * delta;
+    }
+    
+    private void TryApplyRotation(double nextAngle, ref double curX, ref double curY)
+    {
+        if (nextAngle < 0) nextAngle += 360;
+
+        if (!IsColliding(curX, curY, nextAngle))
+        {
+            _angle = nextAngle;
+            return;
+        }
+        
+        for (var r = 1; r <= 3; r++)
+        {
+            for (var a = 0; a < 360; a += 45)
+            {
+                var rad = a * Math.PI / 180;
+                var testX = curX + Math.Cos(rad) * r;
+                var testY = curY + Math.Sin(rad) * r;
+
+                if (IsColliding(testX, testY, nextAngle)) continue;
+                curX = testX;
+                curY = testY;
+                _angle = nextAngle;
+                return;
+            }
+        }
+    }
+
+    private void ApplyMovement(double move, ref double curX, ref double curY)
+    {
         var steps = (int)Math.Ceiling(Math.Abs(move) / 2.0);
         var stepMove = move / steps;
+        
         var radMove = (_angle - 90) * Math.PI / 180;
         var vx = Math.Cos(radMove) * stepMove;
         var vy = Math.Sin(radMove) * stepMove;
@@ -284,15 +229,13 @@ public class TankController: IDisposable
             var nextX = curX + vx;
             var nextY = curY + vy;
 
-            var wallHit = TankWallCollision.IsCollidingWithWall(nextX, nextY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH);
-            
-            if (!wallHit)
+            if (!IsColliding(nextX, nextY, _angle))
             {
                 var hitTank = TankTankCollision.GetCollidingTank(_tank, nextX, nextY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height);
-                
                 if (hitTank != null)
                 {
-                    if (!TankTankCollision.TryPush(hitTank, vx, vy, _cellSize, _passages, _mapW, _mapH, curX, curY)) continue;
+                   if (!TankTankCollision.TryPush(hitTank, vx, vy, _cellSize, _passages, _mapW, _mapH, curX, curY)) 
+                       continue;
                 }
 
                 curX = nextX;
@@ -300,33 +243,70 @@ public class TankController: IDisposable
             }
             else
             {
-                if (!TankWallCollision.IsCollidingWithWall(nextX, curY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH) &&
-                    !TankTankCollision.IsHittingAnyTank(_tank, nextX, curY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height))
+                if (!IsColliding(nextX, curY, _angle))
                 {
                     curX = nextX;
                 }
-                else if (!TankWallCollision.IsCollidingWithWall(curX, nextY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH) &&
-                         !TankTankCollision.IsHittingAnyTank(_tank, curX, nextY, _angle, _tank.RenderSize.Width, _tank.RenderSize.Height))
+                else if (!IsColliding(curX, nextY, _angle))
                 {
                     curY = nextY;
                 }
             }
         }
     }
+
+    private bool IsColliding(double x, double y, double angle)
+    {
+        return TankWallCollision.IsCollidingWithWall(x, y, angle, _tank.RenderSize.Width, _tank.RenderSize.Height, _cellSize, _passages, _mapW, _mapH) ||
+               TankTankCollision.IsHittingAnyTank(_tank, x, y, angle, _tank.RenderSize.Width, _tank.RenderSize.Height);
+    }
     
+    private void UpdateVisuals(double x, double y)
+    {
+        Canvas.SetLeft(_tank, x - _tank.RenderSize.Width / 2);
+        Canvas.SetTop(_tank, y - _tank.RenderSize.Height / 2);
+        
+        _tank.RenderTransform = new RotateTransform(_angle, _tank.RenderSize.Width / 2, _tank.RenderSize.Height / 2);
+        
+        TankRegistry.UpdateState(_tank, x, y, _angle);
+    }
+
+    private static double NormalizeAngleDiff(double a)
+    {
+        while (a > 180) a -= 360;
+        while (a < -180) a += 360;
+        return a;
+    }
+
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-
-        CompositionTarget.Rendering -= OnUpdate;
-        if (_window != null)
-        {
-            _window.PreviewKeyDown -= HandleKeyDown;
-            _window.PreviewKeyUp -= HandleKeyUp;
-        }
+        Dispose(true);
         
-        _canvas = null;
-        _window = null;
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+
+        if (disposing)
+        {
+            CompositionTarget.Rendering -= OnUpdate;
+            if (_window != null)
+            {
+                _window.PreviewKeyDown -= HandleKeyDown;
+                _window.PreviewKeyUp -= HandleKeyUp;
+            }
+        
+            _canvas = null;
+            _window = null;
+        }
+
+        _disposed = true;
+    }
+
+    ~TankController()
+    {
+        Dispose(false);
     }
 }

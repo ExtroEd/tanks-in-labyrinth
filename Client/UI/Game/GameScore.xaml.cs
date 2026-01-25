@@ -74,20 +74,26 @@ public partial class GameScore
     
     public void RefreshScores()
     {
-        var tanks = TankRegistry.Tanks;
+        var sessionKills = TankRegistry.SessionScores;
+        var sessionWins = TankRegistry.SessionWins;
 
-        SetKills(KillsP1, 0);
-        SetKills(KillsP2, 1);
-        SetKills(KillsP3, 2);
-        SetKills(KillsP4, 3);
+        UpdatePlayerStats(KillsP1, WinsP1, 0);
+        UpdatePlayerStats(KillsP2, WinsP2, 1);
+        UpdatePlayerStats(KillsP3, WinsP3, 2);
+        UpdatePlayerStats(KillsP4, WinsP4, 3);
         return;
 
-        void SetKills(TextBlock? tb, int playerIndex)
+        void UpdatePlayerStats(TextBlock? killsTb, TextBlock? winsTb, int playerIndex)
         {
-            if (tb == null) return;
-            var ts = tanks.FirstOrDefault(t => t.PlayerIndex == playerIndex);
-            var text = ts != null ? $"Kills: {ts.Kills}" : "Kills: 0";
-            tb.Dispatcher.Invoke(() => tb.Text = text);
+            if (killsTb != null)
+            {
+                sessionKills.TryGetValue(playerIndex, out var kills);
+                killsTb.Dispatcher.Invoke(() => killsTb.Text = $"Kills: {kills}");
+            }
+
+            if (winsTb == null) return;
+            sessionWins.TryGetValue(playerIndex, out var wins);
+            winsTb.Dispatcher.Invoke(() => winsTb.Text = $"Wins: {wins}");
         }
     }
 }
