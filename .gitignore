@@ -68,5 +68,3 @@ secrets.json
 # Crash dumps
 # =====================
 *.dmp
-
-*.cur

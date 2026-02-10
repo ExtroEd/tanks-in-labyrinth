@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="100px" height="100px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 100 100"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str1 {stroke:#333333;stroke-linecap:round;stroke-miterlimit:22.9256}
+    .str2 {stroke:#333333;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.9256}
+    .str0 {stroke:#333333;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.9256}
+    .fil2 {fill:none}
+    .fil3 {fill:#333333}
+    .fil4 {fill:#333333;fill-rule:nonzero}
+    .fil0 {fill:url(#id0)}
+    .fil1 {fill:url(#id1)}
+   ]]>
+  </style>
+  <linearGradient id="id0" gradientUnits="userSpaceOnUse" x1="14.484" y1="85.194" x2="85.516" y2="14.807">
+   <stop offset="0" style="stop-opacity:1; stop-color:#595959"/>
+   <stop offset="1" style="stop-opacity:1; stop-color:#8C8C8C"/>
+  </linearGradient>
+  <linearGradient id="id1" gradientUnits="userSpaceOnUse" xlink:href="#id0" x1="73.331" y1="17.508" x2="26.67" y2="82.492">
+  </linearGradient>
+ </defs>
+ <g id="Слой_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" width="100" height="100"/>
+  <path class="fil1" d="M10 10l80.001 0 0 80 -80.001 0 0 -80zm2.667 2.666l74.667 0 0 74.668 -74.667 0 0 -74.668z"/>
+  <circle class="fil2 str0" cx="50" cy="50" r="15"/>
+  <rect class="fil3 str1" x="47.663" y="28.004" width="4" height="7"/>
+  <rect class="fil3 str1" transform="matrix(0.566617 -0.566617 0.642481 0.642481 32.7936 36.0983)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" transform="matrix(2.12608E-14 -0.801317 0.908605 2.41474E-14 28.0028 52.3366)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" transform="matrix(-0.566617 -0.566617 0.642481 -0.642481 36.0975 67.2064)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" x="48.336" y="64.997" width="4" height="7"/>
+  <rect class="fil3 str1" transform="matrix(-0.566617 0.566617 -0.642481 -0.642481 67.2057 63.9025)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" transform="matrix(-6.36713E-14 0.801317 -0.908605 -7.24976E-14 71.9964 47.6641)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" transform="matrix(0.566617 0.566617 -0.642481 0.642481 63.9017 32.7943)" width="4.992" height="7.704"/>
+  <rect class="fil3 str1" x="47.663" y="28.004" width="4" height="7"/>
+  <path class="fil4 str2" d="M49.834 46.89c0.909,-1.819 1.818,-2.728 3.637,-2.728 2.008,0 3.638,1.629 3.638,3.637 0,3.638 -3.638,7.275 -7.275,10.912 -3.638,-3.637 -7.275,-7.274 -7.275,-10.912 0,-2.008 1.629,-3.637 3.637,-3.637 1.819,0 2.728,0.909 3.638,2.728z"/>
+ </g>
+</svg>

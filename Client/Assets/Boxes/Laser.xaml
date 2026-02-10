@@ -1,0 +1,27 @@
+﻿<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         Stretch="Uniform">
+    <Canvas Width="100" Height="100">
+        <Canvas.Resources>
+            <LinearGradientBrush x:Key="Id0Gradient" MappingMode="Absolute" 
+                                 StartPoint="14.484,85.194" EndPoint="85.516,14.807">
+                <GradientStop Color="#FF595959" Offset="0"/>
+                <GradientStop Color="#FF8C8C8C" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Id1Gradient" MappingMode="Absolute" 
+                                 StartPoint="73.331,17.508" EndPoint="26.67,82.492">
+                <GradientStop Color="#FF595959" Offset="0"/>
+                <GradientStop Color="#FF8C8C8C" Offset="1"/>
+            </LinearGradientBrush>
+        </Canvas.Resources>
+
+        <Rectangle Width="100" Height="100" Fill="{StaticResource Id0Gradient}"/>
+
+        <Path Fill="#FF333333" 
+              Data="F1 M37.986 40.982l-25.333 23.253 0.027 -7.965 25.334 -23.253 0.077 0.004 -0.105 7.961zm0.028 -7.965l0.039 -0.036 0.038 0.04 -0.077 -0.004zm22.895 31.962l-23.001 -24 0.183 -7.958 23 24 -0.104 7.961 -0.078 -0.003zm0.078 0.003l-0.04 0.037 -0.038 -0.04 0.078 0.003zm26.334 -24.428l-26.334 24.428 0.026 -7.964 26.334 -24.428 -0.026 7.964z" />
+
+        <Path Fill="{StaticResource Id1Gradient}"
+              Data="F0 M10 10l80.001 0 0 80 -80.001 0 0 -80zm2.667 2.666l74.667 0 0 74.668 -74.667 0 0 -74.668z" />
+    </Canvas>
+</Viewbox>

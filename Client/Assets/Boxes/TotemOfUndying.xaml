@@ -1,0 +1,71 @@
+﻿<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         Stretch="Uniform">
+    <Canvas Width="100" Height="100">
+        <Canvas.Resources>
+            <LinearGradientBrush x:Key="Id0Brush" MappingMode="Absolute" 
+                                 StartPoint="14.484,85.194" EndPoint="85.516,14.807">
+                <GradientStop Color="#FF595959" Offset="0"/>
+                <GradientStop Color="#FF8C8C8C" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="Id1Brush" MappingMode="Absolute" 
+                                 StartPoint="73.331,17.508" EndPoint="26.67,82.492">
+                <GradientStop Color="#FF595959" Offset="0"/>
+                <GradientStop Color="#FF8C8C8C" Offset="1"/>
+            </LinearGradientBrush>
+
+            <SolidColorBrush x:Key="MainBrush" Color="#FF333333"/>
+        </Canvas.Resources>
+
+        <Rectangle Width="100" Height="100" Fill="{StaticResource Id0Brush}"/>
+        <Path Fill="{StaticResource Id1Brush}"
+              Data="M 10,10 H 90 V 90 H 10 V 10 Z M 12.667,12.666 V 87.334 H 87.334 V 12.666 H 12.667 Z" />
+
+        <Canvas>
+            <Canvas.RenderTransform>
+                <ScaleTransform ScaleX="1.2" ScaleY="1.2" CenterX="50" CenterY="50"/>
+            </Canvas.RenderTransform>
+
+            <Ellipse Canvas.Left="35" Canvas.Top="35" Width="30" Height="30" 
+                     Stroke="{StaticResource MainBrush}" StrokeThickness="4"/>
+
+            <Canvas>
+                <Canvas.Resources>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Fill" Value="{StaticResource MainBrush}"/>
+                        <Setter Property="Width" Value="4"/>
+                        <Setter Property="Height" Value="6"/>
+                    </Style>
+                </Canvas.Resources>
+                <Rectangle Canvas.Left="48" Canvas.Top="29"/>
+                <Rectangle Canvas.Left="48" Canvas.Top="65"/>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="45"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="90"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="135"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="180"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="225"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="270"/></Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle Canvas.Left="48" Canvas.Top="29" RenderTransformOrigin="0.5,3.5">
+                    <Rectangle.RenderTransform><RotateTransform Angle="315"/></Rectangle.RenderTransform>
+                </Rectangle>
+            </Canvas>
+
+            <Path Fill="{StaticResource MainBrush}" Stroke="{StaticResource MainBrush}" StrokeThickness="1"
+                  StrokeStartLineCap="Round" StrokeLineJoin="Round"
+                  Data="M 49.834,46.89 C 50.743,45.071 51.652,44.162 53.471,44.162 C 55.479,44.162 57.109,45.791 57.109,47.799 C 57.109,51.437 53.471,55.074 49.834,58.711 C 46.196,55.074 42.559,51.437 42.559,47.8 C 42.559,45.792 44.188,44.163 46.196,44.163 C 48.015,44.163 48.924,45.072 49.834,46.891 Z" />
+        </Canvas>
+    </Canvas>
+</Viewbox>
