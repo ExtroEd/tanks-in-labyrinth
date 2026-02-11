@@ -159,7 +159,7 @@ public sealed class TankController : IDisposable
         if (desiredAngle < 0) desiredAngle += 360.0;
 
         var rotThreshold = 0.1 * _cellSize;
-        var moveThreshold = 1.0 * _cellSize;
+        const double moveThreshold = 200.0;
         
         if (dist > rotThreshold)
         {
@@ -176,9 +176,11 @@ public sealed class TankController : IDisposable
             }
         }
 
+        var screenW = SystemParameters.PrimaryScreenWidth;
+        var screenH = SystemParameters.PrimaryScreenHeight;
         var isAtEdge = mousePos.X <= 0.5 || mousePos.Y <= 0.5 || 
-                       mousePos.X >= Math.Max(_canvas!.ActualWidth, _canvas.Width) - 0.5 || 
-                       mousePos.Y >= Math.Max(_canvas.ActualHeight, _canvas.Height) - 0.5;
+                       mousePos.X >= screenW - 0.5 || 
+                       mousePos.Y >= screenH - 0.5;
 
         if (!(dist > moveThreshold) && !isAtEdge) return;
         var angleToCursor = NormalizeAngleDiff(desiredAngle - _angle);

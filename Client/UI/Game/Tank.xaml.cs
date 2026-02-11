@@ -116,7 +116,7 @@ public partial class Game
 
         window.PreviewKeyDown += OnWindowKeyDown;
 
-        MazeCanvas.MouseLeftButtonDown += OnCanvasMouseDown;
+        window.PreviewMouseLeftButtonDown += OnCanvasMouseDown;
 
         GC.KeepAlive(_controllers);
     }
@@ -139,7 +139,7 @@ public partial class Game
     
     private void HandleTankHit(TankState hitTank, UIElement? owner)
     {
-        if (owner != null)
+        if (owner != null && owner != hitTank.Visual)  // ✅ ИЗМЕНЕНО: проверяем, что это НЕ самоубийство
         {
             var killer = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == owner);
             if (killer != null)
@@ -147,7 +147,7 @@ public partial class Game
                 var killerIdx = killer.PlayerIndex;
 
                 TankRegistry.SessionScores.TryAdd(killerIdx, 0);
-                TankRegistry.SessionScores[killerIdx]++;
+                TankRegistry.SessionScores[killerIdx]++;  // Начисляем очки только за РЕАЛЬНЫЕ убийства
             }
         }
 

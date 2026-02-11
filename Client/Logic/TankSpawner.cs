@@ -41,11 +41,14 @@ public class TankSpawner
 
             canvas.Children.Add(tank);
 
+            TankRegistry.PersistentSuicides.TryGetValue(i, out var suicides);
+            
             TankRegistry.Tanks.Add(new TankState
             {
                 PlayerIndex = i,
                 IsAlive = true,
                 Kills = 0,
+                Suicides = suicides,
 
                 Visual = tank,
                 X = cell.x * cellSize + cellSize / 2.0,

@@ -9,7 +9,9 @@ public class TankState
     public bool IsAlive { get; set; } = true;
 
     public int Kills { get; set; }
-
+    
+    public int Suicides { get; set; }
+    
     public double X { get; set; }
     public double Y { get; set; }
     public double Angle { get; set; }
@@ -24,6 +26,7 @@ public static class TankRegistry
 
     public static Dictionary<int, int> SessionScores { get; } = new();
     public static Dictionary<int, int> SessionWins { get; } = new();
+    public static Dictionary<int, int> PersistentSuicides { get; } = new();
     
     public static void UpdateState(UIElement visual, double x, double y, double angle)
     {

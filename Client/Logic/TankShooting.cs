@@ -177,12 +177,20 @@ public class TankShooting : IDisposable
             if (hitTarget == null) continue;
             try
             {
-                if (b.Owner != null && b.Owner != hitTarget.Visual)
+                if (b.Owner != null)
                 {
                     var ownerState = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == b.Owner);
                     if (ownerState != null)
                     {
-                        ownerState.Kills++;
+                        if (b.Owner == hitTarget.Visual)
+                        {
+                            ownerState.Suicides++;
+                            TankRegistry.PersistentSuicides[ownerState.PlayerIndex] = ownerState.Suicides;
+                        }
+                        else
+                        {
+                            ownerState.Kills++;
+                        }
                     }
                 }
                 hitTarget.IsAlive = false; 

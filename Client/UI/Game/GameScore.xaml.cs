@@ -77,20 +77,28 @@ public partial class GameScore
         var sessionKills = TankRegistry.SessionScores;
         var sessionWins = TankRegistry.SessionWins;
 
-        UpdatePlayerStats(KillsP1, WinsP1, 0);
-        UpdatePlayerStats(KillsP2, WinsP2, 1);
-        UpdatePlayerStats(KillsP3, WinsP3, 2);
-        UpdatePlayerStats(KillsP4, WinsP4, 3);
+        UpdatePlayerStats(KillsP1, SuicidesP1, WinsP1, 0);
+        UpdatePlayerStats(KillsP2, SuicidesP2, WinsP2, 1);
+        UpdatePlayerStats(KillsP3, SuicidesP3, WinsP3, 2);
+        UpdatePlayerStats(KillsP4, SuicidesP4, WinsP4, 3);
         return;
 
-        void UpdatePlayerStats(TextBlock? killsTb, TextBlock? winsTb, int playerIndex)
+        void UpdatePlayerStats(TextBlock? killsTb, TextBlock? suicidesTb, TextBlock? winsTb, int playerIndex)
         {
+            var tank = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == playerIndex);
+            
             if (killsTb != null)
             {
                 sessionKills.TryGetValue(playerIndex, out var kills);
                 killsTb.Dispatcher.Invoke(() => killsTb.Text = $"Kills: {kills}");
             }
 
+            if (suicidesTb != null)
+            {
+                var suicides = tank?.Suicides ?? TankRegistry.PersistentSuicides.GetValueOrDefault(playerIndex, 0);
+                suicidesTb.Dispatcher.Invoke(() => suicidesTb.Text = $"Suicides: {suicides}");
+            }
+            
             if (winsTb == null) return;
             sessionWins.TryGetValue(playerIndex, out var wins);
             winsTb.Dispatcher.Invoke(() => winsTb.Text = $"Wins: {wins}");

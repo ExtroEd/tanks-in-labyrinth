@@ -38,6 +38,7 @@
                                Text="Kills: 0" 
                                Foreground="Black" 
                                FontSize="24"/>
+                    <TextBlock x:Name="SuicidesP1" Text="Suicides: 0" Foreground="Black" FontSize="24"/>
                 </StackPanel>
             </StackPanel>
 
@@ -51,6 +52,7 @@
                     <TextBlock x:Name="NameP2" Text="Player 2" FontSize="36" Foreground="Black" FontWeight="Bold"/>
                     <TextBlock x:Name="WinsP2" Text="Wins: 0" Foreground="Black" FontSize="24"/>
                     <TextBlock x:Name="KillsP2" Text="Kills: 0" Foreground="Black" FontSize="24"/>
+                    <TextBlock x:Name="SuicidesP2" Text="Suicides: 0" Foreground="Black" FontSize="24"/>
                 </StackPanel>
             </StackPanel>
 
@@ -60,6 +62,7 @@
                     <TextBlock x:Name="NameP3" Text="Player 3" FontSize="36" Foreground="Black" FontWeight="Bold"/>
                     <TextBlock x:Name="WinsP3" Text="Wins: 0" Foreground="Black" FontSize="24"/>
                     <TextBlock x:Name="KillsP3" Text="Kills: 0" Foreground="Black" FontSize="24"/>
+                    <TextBlock x:Name="SuicidesP3" Text="Suicides: 0" Foreground="Black" FontSize="24"/>
                 </StackPanel>
             </StackPanel>
 
@@ -69,6 +72,7 @@
                     <TextBlock x:Name="NameP4" Text="Player 4" FontSize="36" Foreground="Black" FontWeight="Bold"/>
                     <TextBlock x:Name="WinsP4" Text="Wins: 0" Foreground="Black" FontSize="24"/>
                     <TextBlock x:Name="KillsP4" Text="Kills: 0" Foreground="Black" FontSize="24"/>
+                    <TextBlock x:Name="SuicidesP4" Text="Suicides: 0" Foreground="Black" FontSize="24"/>
                 </StackPanel>
             </StackPanel>
             
