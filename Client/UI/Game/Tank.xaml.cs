@@ -54,11 +54,14 @@ public partial class Game
             var spawned = _tanks[idx];
             Panel.SetZIndex(spawned.Tank, 2000);
 
+            TankRegistry.PersistentSuicides.TryGetValue(idx, out var suicides);
+            
             TankRegistry.Tanks.Add(new TankState
             {
                 PlayerIndex = idx,
                 IsAlive = true,
                 Kills = 0,
+                Suicides = suicides,
 
                 Visual = spawned.Tank,
                 Width = spawned.Tank.Width,

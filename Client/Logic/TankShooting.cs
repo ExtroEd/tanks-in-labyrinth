@@ -46,7 +46,10 @@ public class TankShooting : IDisposable
     public void Shoot(UIElement? tankVisual)
     {
         if (tankVisual == null) return;
-        if (_bullets.Count >= MaxActiveBullets) return;
+
+        var playerBullets = _bullets.Count(b => b.Owner == tankVisual);
+        if (playerBullets >= MaxActiveBullets) return;
+
         if (_lastShotAt.TryGetValue(tankVisual, out var t) && (DateTime.Now - t).TotalSeconds < FireCooldownSecondsPerTank) return;
 
         var state = TankRegistry.Tanks.FirstOrDefault(x => x.Visual == tankVisual && x.IsAlive);

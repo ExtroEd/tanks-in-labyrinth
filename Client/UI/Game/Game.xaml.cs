@@ -27,6 +27,9 @@ public partial class Game
         new SolidColorBrush(Color.FromRgb(212, 212, 212));
     
     private bool _isInitialized;
+    
+    private BoxesManager? _boxesManager;
+    private BoxesUIManager? _boxesUI;
 
     public Game(int playerCount, string[] names)
     {
@@ -183,12 +186,14 @@ public partial class Game
                 {
                     MazeCanvas.Children.Add(new System.Windows.Shapes.Line
                     {
-                        X1 = x * _cellSize, Y1 = y * _cellSize,
-                        X2 = x * _cellSize, Y2 = (y + 1) * _cellSize,
+                        X1 = x * _cellSize,
+                        Y1 = y * _cellSize - _currentWallThickness / 2,
+                        X2 = x * _cellSize,
+                        Y2 = (y + 1) * _cellSize + _currentWallThickness / 2,
                         Stroke = wallBrush,
                         StrokeThickness = _currentWallThickness,
-                        StrokeStartLineCap = PenLineCap.Round,
-                        StrokeEndLineCap = PenLineCap.Round
+                        StrokeStartLineCap = PenLineCap.Flat,
+                        StrokeEndLineCap = PenLineCap.Flat
                     });
                 }
             }
@@ -202,12 +207,14 @@ public partial class Game
                 {
                     MazeCanvas.Children.Add(new System.Windows.Shapes.Line
                     {
-                        X1 = x * _cellSize, Y1 = y * _cellSize,
-                        X2 = (x + 1) * _cellSize, Y2 = y * _cellSize,
+                        X1 = x * _cellSize - _currentWallThickness / 2,
+                        Y1 = y * _cellSize,
+                        X2 = (x + 1) * _cellSize + _currentWallThickness / 2,
+                        Y2 = y * _cellSize,
                         Stroke = wallBrush,
                         StrokeThickness = _currentWallThickness,
-                        StrokeStartLineCap = PenLineCap.Round,
-                        StrokeEndLineCap = PenLineCap.Round
+                        StrokeStartLineCap = PenLineCap.Flat,
+                        StrokeEndLineCap = PenLineCap.Flat
                     });
                 }
             }
@@ -238,6 +245,15 @@ public partial class Game
             _roundManager!
         );
 
+        _boxesUI?.Dispose();
+        _boxesManager?.Dispose();
+        _boxesManager = new BoxesManager(_cellSize, _mapW, _mapH);
+        _boxesUI = new BoxesUIManager(_boxesManager, MazeCanvas);
+        _boxesUI.BoxPicked += (tank, boxType) =>
+        {
+            // TODO: Выдать игроку tank бонус boxType
+        };
+        
         var window = Window.GetWindow(this);
         if (window != null)
         {
