@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Client.Logic;
@@ -77,7 +77,6 @@ public partial class GameScore
         var sessionKills = TankRegistry.SessionScores;
         var sessionWins = TankRegistry.SessionWins;
 
-        // Создаём словарь панелей по PlayerIndex для корректной привязки к танкам
         var panelsByIndex = new Dictionary<int, (TextBlock? kills, TextBlock? suicides, TextBlock? wins)>
         {
             { 0, (KillsP1, SuicidesP1, WinsP1) },
@@ -86,7 +85,6 @@ public partial class GameScore
             { 3, (KillsP4, SuicidesP4, WinsP4) }
         };
 
-        // Обновляем только активные танки по их PlayerIndex
         foreach (var tank in TankRegistry.Tanks)
         {
             if (panelsByIndex.TryGetValue(tank.PlayerIndex, out var panels))

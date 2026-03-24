@@ -41,13 +41,12 @@ public partial class Game
 
         _tanks = _tankSpawner.Spawn(
             MazeCanvas,
-            _activeSlots,  // ← Список активных слотов!
+            _activeSlots,
             w,
             h,
             _cellSize
         );
 
-        // Привязываем цели стрельбы по СЛОТАМ (из TankRegistry)
         _shootTargetP1 = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == 0)?.Visual;
         _shootTargetP2 = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == 1)?.Visual;
         _shootTargetP3 = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == 2)?.Visual;
@@ -57,28 +56,23 @@ public partial class Game
         _tankShooting = new TankShooting(MazeCanvas, _cellSize, w, h, _passageSet, _roundManager!);
         _tankShooting.TankHit += HandleTankHit;
         
-        // Создаём контроллеры для АКТИВНЫХ танков по их СЛОТАМ!
         var tankBySlot = TankRegistry.Tanks.ToDictionary(t => t.PlayerIndex, t => t.Visual);
 
-        // P1 (Зелёный) — слот 0
         if (tankBySlot.TryGetValue(0, out var p1Tank))
         {
             _controllers.Add(new TankController(p1Tank, window, Key.W, Key.S, Key.A, Key.D, 0, _cellSize, _passageSet, w, h));
         }
 
-        // P2 (Красный) — слот 1 — МЫШЬ
         if (tankBySlot.TryGetValue(1, out var p2Tank))
         {
             _controllers.Add(new TankController(window, p2Tank, MazeCanvas, 0, _cellSize, _passageSet, w, h));
         }
 
-        // P3 (Синий) — слот 2
         if (tankBySlot.TryGetValue(2, out var p3Tank))
         {
             _controllers.Add(new TankController(p3Tank, window, Key.O, Key.L, Key.K, Key.OemSemicolon, 0, _cellSize, _passageSet, w, h));
         }
 
-        // P4 (Жёлтый) — слот 3
         if (tankBySlot.TryGetValue(3, out var p4Tank))
         {
             _controllers.Add(new TankController(p4Tank, window, Key.NumPad8, Key.NumPad5, Key.NumPad4, Key.NumPad6, 0, _cellSize, _passageSet, w, h));
@@ -95,9 +89,9 @@ public partial class Game
         if (_tankShooting == null) return;
         switch (e.Key)
         {
-            case Key.OemTilde: _tankShooting.Shoot(_shootTargetP1); break;  // ~ — P1 (зелёный)
-            case Key.Add: _tankShooting.Shoot(_shootTargetP3); break;       // + — P3 (синий)
-            case Key.OemQuotes: _tankShooting.Shoot(_shootTargetP4); break; // ' — P4 (жёлтый)
+            case Key.OemTilde: _tankShooting.Shoot(_shootTargetP1); break;
+            case Key.OemQuotes: _tankShooting.Shoot(_shootTargetP3); break;
+            case Key.Add: _tankShooting.Shoot(_shootTargetP4); break;
         }
     }
     
@@ -108,7 +102,7 @@ public partial class Game
     
     private void HandleTankHit(TankState hitTank, UIElement? owner)
     {
-        if (owner != null && owner != hitTank.Visual)  // ✅ ИЗМЕНЕНО: проверяем, что это НЕ самоубийство
+        if (owner != null && owner != hitTank.Visual)
         {
             var killer = TankRegistry.Tanks.FirstOrDefault(t => t.Visual == owner);
             if (killer != null)
@@ -116,7 +110,7 @@ public partial class Game
                 var killerIdx = killer.PlayerIndex;
 
                 TankRegistry.SessionScores.TryAdd(killerIdx, 0);
-                TankRegistry.SessionScores[killerIdx]++;  // Начисляем очки только за РЕАЛЬНЫЕ убийства
+                TankRegistry.SessionScores[killerIdx]++;
             }
         }
 
