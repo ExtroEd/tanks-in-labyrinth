@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Client.Logic;
@@ -77,16 +77,26 @@ public partial class GameScore
         var sessionKills = TankRegistry.SessionScores;
         var sessionWins = TankRegistry.SessionWins;
 
-        UpdatePlayerStats(KillsP1, SuicidesP1, WinsP1, 0);
-        UpdatePlayerStats(KillsP2, SuicidesP2, WinsP2, 1);
-        UpdatePlayerStats(KillsP3, SuicidesP3, WinsP3, 2);
-        UpdatePlayerStats(KillsP4, SuicidesP4, WinsP4, 3);
-        return;
+        // Создаём словарь панелей по PlayerIndex для корректной привязки к танкам
+        var panelsByIndex = new Dictionary<int, (TextBlock? kills, TextBlock? suicides, TextBlock? wins)>
+        {
+            { 0, (KillsP1, SuicidesP1, WinsP1) },
+            { 1, (KillsP2, SuicidesP2, WinsP2) },
+            { 2, (KillsP3, SuicidesP3, WinsP3) },
+            { 3, (KillsP4, SuicidesP4, WinsP4) }
+        };
+
+        // Обновляем только активные танки по их PlayerIndex
+        foreach (var tank in TankRegistry.Tanks)
+        {
+            if (panelsByIndex.TryGetValue(tank.PlayerIndex, out var panels))
+            {
+                UpdatePlayerStats(panels.kills, panels.suicides, panels.wins, tank.PlayerIndex);
+            }
+        }
 
         void UpdatePlayerStats(TextBlock? killsTb, TextBlock? suicidesTb, TextBlock? winsTb, int playerIndex)
         {
-            var tank = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == playerIndex);
-            
             if (killsTb != null)
             {
                 sessionKills.TryGetValue(playerIndex, out var kills);
@@ -95,6 +105,7 @@ public partial class GameScore
 
             if (suicidesTb != null)
             {
+                var tank = TankRegistry.Tanks.FirstOrDefault(t => t.PlayerIndex == playerIndex);
                 var suicides = tank?.Suicides ?? TankRegistry.PersistentSuicides.GetValueOrDefault(playerIndex, 0);
                 suicidesTb.Dispatcher.Invoke(() => suicidesTb.Text = $"Suicides: {suicides}");
             }
