@@ -31,6 +31,7 @@
                         <Rectangle x:Name="IndicatorP1" Width="30" Height="30" Stroke="Black" StrokeThickness="2" Fill="Transparent" Margin="0,5"/>
                         <TextBox x:Name="NameP1" Text="Green" Foreground="Black" Style="{StaticResource NicknameBoxStyle}" KeyDown="NameInput_KeyDown"/>
                         <TextBlock Text="READY: ` (Tilde)" Foreground="#555" HorizontalAlignment="Center" FontSize="12"/>
+                        <CheckBox x:Name="ActiveP1" Content="active" IsChecked="True" FontSize="14"/>
                     </StackPanel>
 
                     <StackPanel x:Name="P2Container" Margin="20">
@@ -42,6 +43,8 @@
                         <Rectangle x:Name="IndicatorP2" Width="30" Height="30" Stroke="Black" StrokeThickness="2" Fill="Transparent" Margin="0,5"/>
                         <TextBox x:Name="NameP2" Text="Red" Foreground="Black" Style="{StaticResource NicknameBoxStyle}" KeyDown="NameInput_KeyDown"/>
                         <TextBlock Text="READY: CLICK" Foreground="#555" HorizontalAlignment="Center" FontSize="12"/>
+                        <CheckBox x:Name="ActiveP2" Content="active" IsChecked="True" FontSize="14"/>
+
                     </StackPanel>
 
                     <StackPanel x:Name="P3Container" Margin="20">
@@ -50,6 +53,8 @@
                         <Rectangle x:Name="IndicatorP3" Width="30" Height="30" Stroke="Black" StrokeThickness="2" Fill="Transparent" Margin="0,5"/>
                         <TextBox x:Name="NameP3" Text="Blue" Foreground="Black" Style="{StaticResource NicknameBoxStyle}" KeyDown="NameInput_KeyDown"/>
                         <TextBlock Text="READY: Num +" Foreground="#555" HorizontalAlignment="Center" FontSize="12"/>
+                        <CheckBox x:Name="ActiveP3" Content="active" IsChecked="True" FontSize="14"/>
+
                     </StackPanel>
 
                     <StackPanel x:Name="P4Container" Margin="20">
@@ -58,6 +63,7 @@
                         <Rectangle x:Name="IndicatorP4" Width="30" Height="30" Stroke="Black" StrokeThickness="2" Fill="Transparent" Margin="0,5"/>
                         <TextBox x:Name="NameP4" Text="Yellow" Foreground="Black" Style="{StaticResource NicknameBoxStyle}" KeyDown="NameInput_KeyDown"/>
                         <TextBlock Text="READY: ' (Apostrophe)" Foreground="#555" HorizontalAlignment="Center" FontSize="12"/>
+                        <CheckBox x:Name="ActiveP4" Content="active" IsChecked="True" FontSize="14"/>
                     </StackPanel>
 
                 </UniformGrid>

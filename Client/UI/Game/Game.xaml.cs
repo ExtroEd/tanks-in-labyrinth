@@ -16,7 +16,7 @@ public partial class Game
     private int _mapH;
     private double _currentWallThickness;
     private readonly Random _random = new();
-    private readonly int _playerCount;
+    private readonly List<int> _activeSlots;
     private List<(int x1, int y1, int x2, int y2)> _passages = [];
     private readonly List<IDisposable> _controllers = [];
 
@@ -31,12 +31,11 @@ public partial class Game
     private BoxesManager? _boxesManager;
     private BoxesUIManager? _boxesUI;
 
-    public Game(int playerCount, string[] names)
+    public Game(int playerCount, List<int> activeSlots, string?[] playerNames)
     {
-        _playerCount = playerCount;
+        _activeSlots = activeSlots;
         InitializeComponent();
-        Hud.Initialize(playerCount, names);
-
+        Hud.Initialize(playerCount, playerNames.Where(n => n != null).ToArray());
         Loaded += OnLoaded;
     }
 
@@ -99,7 +98,7 @@ public partial class Game
     
     private void GenerateAndDrawMaze()
     {
-        var widthCells = _random.Next(6, 7);
+        var widthCells = _random.Next(4, 17);
         var heightCells = widthCells / 2;
 
         _mapW = widthCells;

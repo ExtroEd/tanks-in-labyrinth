@@ -143,19 +143,27 @@ public partial class LocalPlayersPage
                break;
        }
    }
-
+   
    private void StartGame_Click(object sender, RoutedEventArgs e)
    {
        if (Application.Current.MainWindow is not MainWindow main) return;
-       
-       var playerNames = new string[4];
-   
-       playerNames[0] = NameP1.Text;
-       playerNames[1] = NameP2.Text;
-       playerNames[2] = NameP3.Text;
-       playerNames[3] = NameP4.Text;
+    
+       // Список активных слотов (0, 1, 2, 3)
+       var activeSlots = new List<int>();
+       var playerNames = new string?[4];
+    
+       if (ActiveP1.IsChecked == true) { activeSlots.Add(0); playerNames[0] = NameP1.Text; }
+       if (ActiveP2.IsChecked == true) { activeSlots.Add(1); playerNames[1] = NameP2.Text; }
+       if (ActiveP3.IsChecked == true) { activeSlots.Add(2); playerNames[2] = NameP3.Text; }
+       if (ActiveP4.IsChecked == true) { activeSlots.Add(3); playerNames[3] = NameP4.Text; }
 
-       main.SwitchContent(new Game.Game(_playerCount, playerNames));
+       if (activeSlots.Count < 2)
+       {
+           MessageBox.Show("Выберите минимум 2 танка!");
+           return;
+       }
+
+       main.SwitchContent(new Game.Game(activeSlots.Count, activeSlots, playerNames));
    }
 
    private void Back_Click(object sender, RoutedEventArgs e)

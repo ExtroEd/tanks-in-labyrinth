@@ -15,7 +15,7 @@ public class TankSpawner
 
     public List<SpawnedTank> Spawn(
         Canvas canvas,
-        int playerCount,
+        List<int> activeSlots,  // ← ИЗМЕНЕНО: передаём индексы активных (0,1,2,3)
         int w,
         int h,
         double cellSize)
@@ -30,22 +30,23 @@ public class TankSpawner
         var colors = new[] { Colors.Green, Colors.Red, Colors.Blue, Colors.Yellow };
         var targetSize = cellSize * 0.65;
 
-        for (var i = 0; i < playerCount; i++)
+        for (var i = 0; i < activeSlots.Count; i++)
         {
+            int slotIndex = activeSlots[i];  // ← Используем СЛОТ, не порядок!
             var cell = shuffledCells[i];
             var tank = new NormalTank(targetSize);
-            tank.SetColor(colors[i], colors[i]);
+            tank.SetColor(colors[slotIndex], colors[slotIndex]);
 
             Canvas.SetLeft(tank, cell.x * cellSize + (cellSize - targetSize) / 2);
             Canvas.SetTop(tank, cell.y * cellSize + (cellSize - targetSize) / 2);
 
             canvas.Children.Add(tank);
 
-            TankRegistry.PersistentSuicides.TryGetValue(i, out var suicides);
+            TankRegistry.PersistentSuicides.TryGetValue(slotIndex, out var suicides);
             
             TankRegistry.Tanks.Add(new TankState
             {
-                PlayerIndex = i,
+                PlayerIndex = slotIndex,  // ← ВАЖНО: используем слот, не i!
                 IsAlive = true,
                 Kills = 0,
                 Suicides = suicides,

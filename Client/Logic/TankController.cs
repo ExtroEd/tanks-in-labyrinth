@@ -26,7 +26,7 @@ public sealed class TankController : IDisposable
     private bool _forward, _backward, _left, _right;
 
     private const double SpeedCells = 1.5;
-    private const double RotationSpeed = 250;
+    private const double RotationSpeed = 250; //250
     private const double BackwardFactor = 0.75;
     private const double TimeStepLimit = 0.1;
 

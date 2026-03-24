@@ -19,9 +19,9 @@ public class TankShooting : IDisposable
     private const double BulletSpeedCellsPerSec = 2;
     private const double BulletLifetimeSeconds = 15.0;
     private const double FireCooldownSecondsPerTank = 0.1;
-    private const double OwnerCollisionIgnoreSeconds = 0.1;
-    private const int MaxRicochetsPerBullet = 20;
-    private const int MaxActiveBullets = 3;
+    private const double OwnerCollisionIgnoreSeconds = 1;
+    private const int MaxRicochetsPerBullet = 15;
+    private const int MaxActiveBullets = 5;
     private readonly Dictionary<UIElement, DateTime> _lastShotAt = new();
     private readonly RoundManager _roundManager;
 
